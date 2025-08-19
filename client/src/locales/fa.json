@@ -48,7 +48,7 @@
     "dashboard": "پنل مدیریت",
     "createTournament": "ایجاد تورنمنت",
     "tournamentList": "لیست تورنمنت‌ها",
-    "registrations": "ثبت‌نام‌ها",
+    "registrations": "ثبت‌نام‌های تورنمنت",
     "name": "نام",
     "date": "تاریخ",
     "time": "زمان",
@@ -57,7 +57,10 @@
     "venueInfo": "اطلاعات اضافی محل",
     "create": "ایجاد",
     "edit": "ویرایش",
-    "setAsNext": "انتخاب به عنوان تورنمنت بعدی"
+    "setAsNext": "انتخاب به عنوان تورنمنت بعدی",
+    "participantCount": "شرکت‌کننده",
+    "noRegistrations": "هنوز ثبت‌نامی وجود ندارد",
+    "noRegistrationsDesc": "شرکت‌کنندگان پس از ثبت‌نام در این تورنمنت در اینجا نمایش داده می‌شوند"
   },
   "faq": {
     "title": "سؤالات متداول",

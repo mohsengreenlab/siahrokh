@@ -40,7 +40,9 @@ Preferred communication style: Simple, everyday language.
 
 ### Key Features & Workflows
 - **Tournament Management**: Admin can create/edit tournaments with venue details and registration status
-- **Registration Flow**: Users select tournaments, fill forms, upload payment receipts, agree to terms
+- **Registration Flow**: Users select tournaments, fill forms with comprehensive validation, upload payment receipts, agree to terms
+- **Registration Validation**: Client-side and server-side validation with bilingual error messages, accessibility features, and focus management
+- **Admin Registration View**: Comprehensive table showing all participant details including optional fields with neutral placeholders
 - **Countdown System**: Homepage displays countdown to next tournament set by admin
 - **PDF Generation**: Post-registration PDF download with tournament details using Puppeteer
 - **Language Support**: Full bilingual interface with persistent language switching

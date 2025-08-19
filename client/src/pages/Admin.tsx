@@ -276,41 +276,92 @@ export default function Admin() {
         {/* Registrations */}
         {selectedTournamentId && (
           <div className="mt-8 bg-chess-card rounded-xl p-6 border border-gray-700">
-            <h2 className="text-xl font-semibold text-white mb-4">{t('admin.registrations')}</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-white">{t('admin.registrations')}</h2>
+              <div className="text-sm text-gray-400">
+                {registrations.length} participant{registrations.length !== 1 ? 's' : ''}
+              </div>
+            </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
+              <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-gray-600">
-                    <th className="p-2 text-gray-300">Name</th>
-                    <th className="p-2 text-gray-300">Phone</th>
-                    <th className="p-2 text-gray-300">Registration Date</th>
-                    <th className="p-2 text-gray-300">Receipt</th>
+                    <th className="p-3 text-gray-300 font-medium">Full Name</th>
+                    <th className="p-3 text-gray-300 font-medium">Phone Number</th>
+                    <th className="p-3 text-gray-300 font-medium">Notes</th>
+                    <th className="p-3 text-gray-300 font-medium">Terms Agreed</th>
+                    <th className="p-3 text-gray-300 font-medium">Registration Date</th>
+                    <th className="p-3 text-gray-300 font-medium">Receipt File</th>
+                    <th className="p-3 text-gray-300 font-medium">Registration ID</th>
                   </tr>
                 </thead>
                 <tbody>
                   {registrations.map((registration) => (
-                    <tr key={registration.id} className="border-b border-gray-700">
-                      <td className="p-2 text-white">{registration.name}</td>
-                      <td className="p-2 text-gray-300">{registration.phone}</td>
-                      <td className="p-2 text-gray-300">
-                        {new Date(registration.createdAt).toLocaleDateString()}
+                    <tr key={registration.id} className="border-b border-gray-700 hover:bg-gray-800/30">
+                      <td className="p-3 text-white font-medium">{registration.name}</td>
+                      <td className="p-3 text-gray-300 font-mono">{registration.phone}</td>
+                      <td className="p-3 text-gray-300 max-w-xs">
+                        {registration.description ? (
+                          <div className="truncate" title={registration.description}>
+                            {registration.description}
+                          </div>
+                        ) : (
+                          <span className="text-gray-500">—</span>
+                        )}
                       </td>
-                      <td className="p-2">
-                        <a
-                          href={`/${registration.receiptFilePath}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-300 hover:text-white hover:underline"
+                      <td className="p-3">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          registration.agreedTos 
+                            ? 'bg-green-900 text-green-200' 
+                            : 'bg-red-900 text-red-200'
+                        }`}>
+                          {registration.agreedTos ? 'Yes' : 'No'}
+                        </span>
+                      </td>
+                      <td className="p-3 text-gray-300">
+                        {new Date(registration.createdAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </td>
+                      <td className="p-3">
+                        {registration.receiptFilePath ? (
+                          <a
+                            href={`/${registration.receiptFilePath}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 hover:underline"
+                          >
+                            <span>View File</span>
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </a>
+                        ) : (
+                          <span className="text-gray-500">No file</span>
+                        )}
+                      </td>
+                      <td className="p-3 text-gray-400 font-mono text-xs">
+                        <button 
+                          onClick={() => navigator.clipboard.writeText(registration.id)}
+                          className="truncate max-w-24 hover:bg-gray-700 px-1 py-1 rounded transition-colors"
+                          title={`Click to copy: ${registration.id}`}
                         >
-                          View Receipt
-                        </a>
+                          {registration.id.slice(0, 8)}...
+                        </button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
               {registrations.length === 0 && (
-                <p className="text-gray-400 text-center py-8">No registrations found</p>
+                <div className="text-center py-12">
+                  <div className="text-gray-500 text-lg mb-2">No registrations yet</div>
+                  <div className="text-gray-400 text-sm">Participants will appear here once they register for this tournament</div>
+                </div>
               )}
             </div>
           </div>

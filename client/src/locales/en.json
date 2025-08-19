@@ -48,7 +48,7 @@
     "dashboard": "Admin Dashboard",
     "createTournament": "Create Tournament",
     "tournamentList": "Tournament List",
-    "registrations": "Registrations",
+    "registrations": "Tournament Registrations",
     "name": "Name",
     "date": "Date",
     "time": "Time",
@@ -57,7 +57,10 @@
     "venueInfo": "Additional Venue Information",
     "create": "Create",
     "edit": "Edit",
-    "setAsNext": "Set as Next Tournament"
+    "setAsNext": "Set as Next Tournament",
+    "participantCount": "participants",
+    "noRegistrations": "No registrations yet",
+    "noRegistrationsDesc": "Participants will appear here once they register for this tournament"
   },
   "faq": {
     "title": "Frequently Asked Questions",
