@@ -45,6 +45,11 @@ export default function Admin() {
 
   const { data: registrations = [] } = useQuery<Registration[]>({
     queryKey: ['/api/admin/registrations', selectedTournamentId],
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/registrations?tournamentId=${selectedTournamentId}`);
+      if (!response.ok) throw new Error('Failed to fetch registrations');
+      return response.json();
+    },
     enabled: !!selectedTournamentId
   });
 

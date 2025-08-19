@@ -132,7 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const registrationData = insertRegistrationSchema.parse({
         ...req.body,
-        receiptFilePath: req.file.path,
+        receiptFilePath: req.file?.path || '',
         agreedTos: req.body.agreedTos === 'true'
       });
 
