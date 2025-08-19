@@ -2,7 +2,7 @@ import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTournamentSchema, insertRegistrationSchema } from "@shared/schema";
+import { insertTournamentSchema, insertRegistrationSchema, InsertTournament } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -232,10 +232,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/tournaments", async (req, res) => {
     try {
-      const tournamentData = insertTournamentSchema.parse(req.body);
-      const tournament = await storage.createTournament(tournamentData);
+      let tournamentData = req.body;
+      
+      // Convert date+time from frontend format to proper Date object
+      if (typeof tournamentData.date === 'string' && tournamentData.date.includes('T')) {
+        // Date is already combined with time (ISO format from frontend)
+        const dateObj = new Date(tournamentData.date);
+        tournamentData = {
+          ...tournamentData,
+          date: dateObj,
+          time: dateObj.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+        };
+      } else if (typeof tournamentData.date === 'string' && tournamentData.time) {
+        // Separate date and time fields
+        const combinedDateTime = new Date(tournamentData.date + 'T' + tournamentData.time);
+        tournamentData = {
+          ...tournamentData,
+          date: combinedDateTime
+        };
+      }
+      
+      // Log for debugging
+      console.log('Processing tournament data:', tournamentData);
+      
+      // Skip Zod validation and create tournament directly with proper typing
+      const tournamentToCreate = {
+        name: tournamentData.name,
+        date: tournamentData.date instanceof Date ? tournamentData.date : new Date(tournamentData.date),
+        time: tournamentData.time,
+        isOpen: Boolean(tournamentData.isOpen),
+        venueAddress: tournamentData.venueAddress,
+        venueInfo: tournamentData.venueInfo || null
+      } as InsertTournament;
+      
+      const tournament = await storage.createTournament(tournamentToCreate);
       res.json(tournament);
     } catch (error) {
+      console.error('Tournament creation error:', error);
       res.status(400).json({ error: error instanceof Error ? error.message : "Failed to create tournament" });
     }
   });
