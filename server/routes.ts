@@ -89,8 +89,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Submit registration
   app.post("/api/registrations", upload.single('receiptFile'), async (req, res) => {
     try {
+      const errors: string[] = [];
+
+      // Manual validation with detailed error messages
+      if (!req.body.name || req.body.name.trim().length < 2) {
+        errors.push("Full name must be at least 2 characters long");
+      }
+      
+      if (!req.body.phone || req.body.phone.length < 10) {
+        errors.push("Phone number must be at least 10 digits");
+      }
+      
       if (!req.file) {
-        return res.status(400).json({ error: "Receipt file is required" });
+        errors.push("Receipt file is required");
+      } else {
+        // File type validation
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+        if (!allowedTypes.includes(req.file.mimetype)) {
+          errors.push("Only JPEG, PNG, and PDF files are allowed");
+        }
+        
+        // File size validation
+        if (req.file.size > 10 * 1024 * 1024) {
+          errors.push("File size must be less than 10MB");
+        }
+      }
+      
+      if (req.body.agreedTos !== 'true') {
+        errors.push("You must agree to the Terms of Service");
+      }
+
+      if (!req.body.tournamentId) {
+        errors.push("Tournament selection is required");
+      }
+
+      if (errors.length > 0) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          errors: errors 
+        });
       }
 
       const registrationData = insertRegistrationSchema.parse({
@@ -108,7 +145,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('Registration error:', error);
-      res.status(400).json({ error: error instanceof Error ? error.message : "Failed to create registration" });
+      if (error instanceof Error && error.message.includes('ZodError')) {
+        return res.status(400).json({ 
+          error: "Invalid data provided", 
+          errors: ["Please check all required fields and try again"]
+        });
+      }
+      res.status(400).json({ 
+        error: "Registration failed", 
+        errors: ["Please check your information and try again"] 
+      });
     }
   });
 

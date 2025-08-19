@@ -77,9 +77,14 @@
   },
   "errors": {
     "required": "This field is required",
-    "invalidPhone": "Invalid phone number",
-    "fileRequired": "File upload is required",
-    "fileTooLarge": "File size exceeds limit",
-    "invalidFileType": "Invalid file type"
+    "invalidPhone": "Please enter a valid phone number (minimum 10 digits)",
+    "fileRequired": "Receipt file upload is required",
+    "fileTooLarge": "File size must be less than 10MB",
+    "invalidFileType": "Only JPEG, PNG, and PDF files are allowed",
+    "tosRequired": "You must agree to the Terms of Service to continue",
+    "nameMin": "Full name must be at least 2 characters long",
+    "phoneMin": "Phone number must be at least 10 digits",
+    "validationSummary": "Please fix the following errors:",
+    "serverError": "Registration failed. Please check your information and try again."
   }
 }

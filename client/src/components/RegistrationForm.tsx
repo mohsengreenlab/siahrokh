@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,13 +11,28 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
-const formSchema = z.object({
-  name: z.string().min(1, 'required'),
-  phone: z.string().min(10, 'invalidPhone'),
-  receiptFile: z.instanceof(File).refine((file) => file.size <= 10 * 1024 * 1024, 'fileTooLarge'),
+const createFormSchema = (t: (key: string) => string) => z.object({
+  name: z.string()
+    .min(1, t('errors.required'))
+    .min(2, t('errors.nameMin')),
+  phone: z.string()
+    .min(1, t('errors.required'))
+    .min(10, t('errors.phoneMin'))
+    .regex(/^[0-9+\-\s()]+$/, t('errors.invalidPhone')),
+  receiptFile: z.instanceof(File, { message: t('errors.fileRequired') })
+    .refine((file) => file.size <= 10 * 1024 * 1024, t('errors.fileTooLarge'))
+    .refine(
+      (file) => {
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+        return allowedTypes.includes(file.type);
+      },
+      t('errors.invalidFileType')
+    ),
   description: z.string().optional(),
-  agreedTos: z.boolean().refine((val) => val === true, 'required')
+  agreedTos: z.boolean().refine((val) => val === true, t('errors.tosRequired'))
 });
 
 interface RegistrationFormProps {
@@ -32,6 +47,9 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
   const queryClient = useQueryClient();
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [serverErrors, setServerErrors] = useState<string[]>([]);
+  const errorSummaryRef = useRef<HTMLDivElement>(null);
+  const formSchema = createFormSchema(t);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,6 +60,15 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
       agreedTos: false
     }
   });
+
+  // Focus management for accessibility
+  useEffect(() => {
+    const errors = form.formState.errors;
+    if (Object.keys(errors).length > 0 && errorSummaryRef.current) {
+      errorSummaryRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      errorSummaryRef.current.focus();
+    }
+  }, [form.formState.errors]);
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
@@ -59,12 +86,16 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
       });
 
       if (!response.ok) {
-        throw new Error('Registration failed');
+        const errorData = await response.json();
+        const error = new Error('Registration failed');
+        (error as any).serverErrors = errorData.errors || [errorData.error || 'Registration failed'];
+        throw error;
       }
 
       return response.json();
     },
     onSuccess: (data) => {
+      setServerErrors([]);
       toast({
         title: t('registration.success'),
         description: t('registration.successSubtitle')
@@ -72,10 +103,22 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
       onSuccess(data.registration, data.tournament);
       queryClient.invalidateQueries({ queryKey: ['/api/tournaments'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      let errorMessages: string[] = [];
+      
+      // Check if server errors are attached to the error object
+      if (error.serverErrors && Array.isArray(error.serverErrors)) {
+        errorMessages = error.serverErrors;
+      } else if (error.message) {
+        errorMessages = [error.message];
+      } else {
+        errorMessages = [t('errors.serverError')];
+      }
+      
+      setServerErrors(errorMessages);
       toast({
         title: 'Error',
-        description: error.message,
+        description: errorMessages[0],
         variant: 'destructive'
       });
     }
@@ -114,8 +157,25 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
   };
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
+    setServerErrors([]); // Clear previous server errors
     mutation.mutate(data);
   };
+
+  // Get form validation errors for summary
+  const getValidationErrors = () => {
+    const errors = form.formState.errors;
+    const errorList: string[] = [];
+    
+    if (errors.name) errorList.push(errors.name.message || t('errors.required'));
+    if (errors.phone) errorList.push(errors.phone.message || t('errors.invalidPhone'));
+    if (errors.receiptFile) errorList.push(errors.receiptFile.message || t('errors.fileRequired'));
+    if (errors.agreedTos) errorList.push(errors.agreedTos.message || t('errors.tosRequired'));
+    
+    return errorList;
+  };
+
+  const validationErrors = getValidationErrors();
+  const hasErrors = validationErrors.length > 0 || serverErrors.length > 0;
 
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8 bg-chess-black">
@@ -126,8 +186,36 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
             <p className="text-white font-medium">{tournament.name}</p>
           </div>
 
+          {/* Error Summary */}
+          {hasErrors && (
+            <div 
+              ref={errorSummaryRef}
+              tabIndex={-1}
+              role="alert"
+              aria-labelledby="error-summary-title"
+              className="mb-6"
+            >
+              <Alert className="border-red-600 bg-red-900/10">
+                <AlertTriangle className="h-4 w-4 text-red-500" />
+                <AlertDescription>
+                  <div id="error-summary-title" className="font-semibold text-red-400 mb-2">
+                    {t('errors.validationSummary')}
+                  </div>
+                  <ul className="list-disc list-inside space-y-1 text-red-300">
+                    {validationErrors.map((error, index) => (
+                      <li key={`validation-${index}`}>{error}</li>
+                    ))}
+                    {serverErrors.map((error, index) => (
+                      <li key={`server-${index}`}>{error}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
               <FormField
                 control={form.control}
                 name="name"
@@ -139,11 +227,19 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                     <FormControl>
                       <Input
                         {...field}
-                        className="bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-gray-400"
+                        data-testid="input-name"
+                        className={`bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-gray-400 ${
+                          form.formState.errors.name ? 'border-red-500 focus:border-red-400' : ''
+                        }`}
                         placeholder={t('registration.fullName')}
+                        aria-invalid={!!form.formState.errors.name}
+                        aria-describedby={form.formState.errors.name ? 'name-error' : undefined}
                       />
                     </FormControl>
-                    <FormMessage className="text-gray-400" />
+                    <FormMessage 
+                      id="name-error" 
+                      className="text-red-400" 
+                    />
                   </FormItem>
                 )}
               />
@@ -160,11 +256,19 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                       <Input
                         {...field}
                         type="tel"
-                        className="bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-gray-400"
+                        data-testid="input-phone"
+                        className={`bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-gray-400 ${
+                          form.formState.errors.phone ? 'border-red-500 focus:border-red-400' : ''
+                        }`}
                         placeholder="09123456789"
+                        aria-invalid={!!form.formState.errors.phone}
+                        aria-describedby={form.formState.errors.phone ? 'phone-error' : undefined}
                       />
                     </FormControl>
-                    <FormMessage className="text-gray-400" />
+                    <FormMessage 
+                      id="phone-error" 
+                      className="text-red-400" 
+                    />
                   </FormItem>
                 )}
               />
@@ -179,13 +283,28 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                     </FormLabel>
                     <FormControl>
                       <div
-                        className={`file-upload-area rounded-lg p-6 text-center cursor-pointer ${
-                          isDragOver ? 'dragover' : ''
+                        className={`file-upload-area rounded-lg p-6 text-center cursor-pointer border-2 border-dashed transition-colors ${
+                          isDragOver 
+                            ? 'border-white bg-gray-800' 
+                            : form.formState.errors.receiptFile
+                            ? 'border-red-500 bg-red-900/10'
+                            : 'border-gray-600 bg-chess-dark hover:border-gray-400'
                         }`}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
                         onClick={() => document.getElementById('file-input')?.click()}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            document.getElementById('file-input')?.click();
+                          }
+                        }}
+                        aria-label={t('registration.fileUpload')}
+                        aria-invalid={!!form.formState.errors.receiptFile}
+                        aria-describedby={form.formState.errors.receiptFile ? 'file-error' : undefined}
                       >
                         <i className="fas fa-cloud-upload-alt text-gray-400 text-4xl mb-4"></i>
                         <p className="text-gray-300 mb-2">{t('registration.fileUpload')}</p>
@@ -193,6 +312,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                         <input
                           id="file-input"
                           type="file"
+                          data-testid="input-receipt"
                           accept="image/*,.pdf"
                           className="hidden"
                           onChange={(e) => {
@@ -222,7 +342,10 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                         </div>
                       </div>
                     )}
-                    <FormMessage className="text-gray-400" />
+                    <FormMessage 
+                      id="file-error" 
+                      className="text-red-400" 
+                    />
                   </FormItem>
                 )}
               />
@@ -255,13 +378,24 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="data-[state=checked]:bg-white data-[state=checked]:border-white"
+                        data-testid="checkbox-terms"
+                        className={`data-[state=checked]:bg-white data-[state=checked]:border-white ${
+                          form.formState.errors.agreedTos ? 'border-red-500' : ''
+                        }`}
+                        aria-invalid={!!form.formState.errors.agreedTos}
+                        aria-describedby={form.formState.errors.agreedTos ? 'tos-error' : undefined}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel className="text-gray-300 text-sm">
                         {t('registration.agreeTerms')} <span className="text-gray-400">*</span>
                       </FormLabel>
+                      {form.formState.errors.agreedTos && (
+                        <FormMessage 
+                          id="tos-error" 
+                          className="text-red-400 text-sm" 
+                        />
+                      )}
                     </div>
                   </FormItem>
                 )}
@@ -270,6 +404,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
               <div className="flex gap-4 pt-4">
                 <Button
                   type="submit"
+                  data-testid="button-submit"
                   disabled={mutation.isPending}
                   className="flex-1 bg-white hover:bg-gray-200 text-black font-semibold py-4 px-6 rounded-lg"
                 >
@@ -285,6 +420,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                 <Button
                   type="button"
                   onClick={onCancel}
+                  data-testid="button-cancel"
                   variant="outline"
                   className="flex-1 border-gray-600 text-white hover:bg-gray-800"
                 >
