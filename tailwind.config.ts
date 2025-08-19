@@ -65,6 +65,7 @@ export default {
         "chess-dark": "var(--chess-dark)",
         "chess-card": "var(--chess-card)",
         "chess-accent": "var(--chess-accent)",
+        "chess-hover": "var(--chess-hover)",
         "chess-success": "var(--chess-success)",
         "chess-error": "var(--chess-error)",
       },

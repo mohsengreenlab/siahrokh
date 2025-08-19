@@ -8,37 +8,38 @@
 :root {
   --background: hsl(0, 0%, 0%);
   --foreground: hsl(0, 0%, 100%);
-  --card: hsl(0, 0%, 16.47%);
+  --card: hsl(0, 0%, 8%);
   --card-foreground: hsl(0, 0%, 100%);
-  --popover: hsl(0, 0%, 10.2%);
+  --popover: hsl(0, 0%, 4%);
   --popover-foreground: hsl(0, 0%, 100%);
-  --primary: hsl(45, 93%, 47%);
+  --primary: hsl(0, 0%, 85%);
   --primary-foreground: hsl(0, 0%, 0%);
-  --secondary: hsl(0, 0%, 10.2%);
+  --secondary: hsl(0, 0%, 12%);
   --secondary-foreground: hsl(0, 0%, 100%);
-  --muted: hsl(0, 0%, 58.82%);
-  --muted-foreground: hsl(0, 0%, 63.92%);
-  --accent: hsl(45, 93%, 47%);
+  --muted: hsl(0, 0%, 20%);
+  --muted-foreground: hsl(0, 0%, 65%);
+  --accent: hsl(0, 0%, 75%);
   --accent-foreground: hsl(0, 0%, 0%);
-  --destructive: hsl(0, 84%, 60%);
+  --destructive: hsl(0, 0%, 45%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(0, 0%, 16.47%);
-  --input: hsl(0, 0%, 16.47%);
-  --ring: hsl(45, 93%, 47%);
-  --sidebar: hsl(0, 0%, 16.47%);
+  --border: hsl(0, 0%, 20%);
+  --input: hsl(0, 0%, 8%);
+  --ring: hsl(0, 0%, 60%);
+  --sidebar: hsl(0, 0%, 8%);
   --sidebar-foreground: hsl(0, 0%, 100%);
-  --sidebar-primary: hsl(45, 93%, 47%);
+  --sidebar-primary: hsl(0, 0%, 85%);
   --sidebar-primary-foreground: hsl(0, 0%, 0%);
-  --sidebar-accent: hsl(0, 0%, 10.2%);
-  --sidebar-accent-foreground: hsl(45, 93%, 47%);
-  --sidebar-border: hsl(0, 0%, 16.47%);
-  --sidebar-ring: hsl(45, 93%, 47%);
+  --sidebar-accent: hsl(0, 0%, 12%);
+  --sidebar-accent-foreground: hsl(0, 0%, 75%);
+  --sidebar-border: hsl(0, 0%, 20%);
+  --sidebar-ring: hsl(0, 0%, 60%);
   --chess-black: hsl(0, 0%, 0%);
-  --chess-dark: hsl(0, 0%, 10.2%);
-  --chess-card: hsl(0, 0%, 16.47%);
-  --chess-accent: hsl(45, 93%, 47%);
-  --chess-success: hsl(159, 78%, 41%);
-  --chess-error: hsl(0, 84%, 60%);
+  --chess-dark: hsl(0, 0%, 6%);
+  --chess-card: hsl(0, 0%, 10%);
+  --chess-accent: hsl(0, 0%, 80%);
+  --chess-hover: hsl(0, 0%, 90%);
+  --chess-success: hsl(0, 0%, 70%);
+  --chess-error: hsl(0, 0%, 40%);
   --font-sans: 'Inter', sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
@@ -48,23 +49,23 @@
 .dark {
   --background: hsl(0, 0%, 0%);
   --foreground: hsl(0, 0%, 100%);
-  --card: hsl(0, 0%, 16.47%);
+  --card: hsl(0, 0%, 8%);
   --card-foreground: hsl(0, 0%, 100%);
-  --popover: hsl(0, 0%, 10.2%);
+  --popover: hsl(0, 0%, 4%);
   --popover-foreground: hsl(0, 0%, 100%);
-  --primary: hsl(45, 93%, 47%);
+  --primary: hsl(0, 0%, 85%);
   --primary-foreground: hsl(0, 0%, 0%);
-  --secondary: hsl(0, 0%, 10.2%);
+  --secondary: hsl(0, 0%, 12%);
   --secondary-foreground: hsl(0, 0%, 100%);
-  --muted: hsl(0, 0%, 58.82%);
-  --muted-foreground: hsl(0, 0%, 63.92%);
-  --accent: hsl(45, 93%, 47%);
+  --muted: hsl(0, 0%, 20%);
+  --muted-foreground: hsl(0, 0%, 65%);
+  --accent: hsl(0, 0%, 75%);
   --accent-foreground: hsl(0, 0%, 0%);
-  --destructive: hsl(0, 84%, 60%);
+  --destructive: hsl(0, 0%, 45%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(0, 0%, 16.47%);
-  --input: hsl(0, 0%, 16.47%);
-  --ring: hsl(45, 93%, 47%);
+  --border: hsl(0, 0%, 20%);
+  --input: hsl(0, 0%, 8%);
+  --ring: hsl(0, 0%, 60%);
 }
 
 @layer base {
@@ -101,7 +102,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--chess-accent);
+  background: var(--muted-foreground);
   border-radius: 3px;
 }
 
@@ -121,18 +122,18 @@
 
 /* File Upload Styles */
 .file-upload-area {
-  border: 2px dashed var(--chess-accent);
+  border: 2px dashed var(--muted-foreground);
   transition: all 0.3s ease;
 }
 
 .file-upload-area:hover {
-  border-color: hsl(45, 90%, 40%);
-  background-color: hsla(45, 93%, 47%, 0.05);
+  border-color: var(--foreground);
+  background-color: hsla(0, 0%, 100%, 0.05);
 }
 
 .file-upload-area.dragover {
-  border-color: hsl(45, 90%, 40%);
-  background-color: hsla(45, 93%, 47%, 0.1);
+  border-color: var(--foreground);
+  background-color: hsla(0, 0%, 100%, 0.1);
 }
 
 /* Chess board pattern */
@@ -192,7 +193,7 @@
 }
 
 .hover\:bg-chess-accent:hover {
-  background-color: var(--chess-accent);
+  background-color: var(--chess-hover);
 }
 
 .hover\:text-chess-accent:hover {
@@ -204,9 +205,9 @@
 }
 
 .focus\:border-chess-accent:focus {
-  border-color: var(--chess-accent);
+  border-color: var(--muted-foreground);
 }
 
 .focus\:ring-chess-accent:focus {
-  --tw-ring-color: var(--chess-accent);
+  --tw-ring-color: var(--muted-foreground);
 }

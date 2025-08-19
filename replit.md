@@ -2,7 +2,7 @@
 
 ## Overview
 
-SiahRokh is a bilingual (Persian/English) chess tournament booking platform built as a full-stack web application. The system allows users to register for chess tournaments by selecting available tournaments, filling out registration forms with payment receipt uploads, and receiving tournament details via PDF downloads. An admin panel enables tournament management and registration oversight. The application features real-time countdown timers to upcoming tournaments and serves static FAQ/Terms documents in both languages.
+SiahRokh is a bilingual (Persian/English) chess tournament booking platform built as a full-stack web application with a strict grayscale UI design. The system allows users to register for chess tournaments by selecting available tournaments, filling out registration forms with payment receipt uploads, and receiving tournament details via PDF downloads. An admin panel enables tournament management and registration oversight. The application features real-time countdown timers to upcoming tournaments and serves static FAQ/Terms documents in both languages. The UI uses only shades of gray (black to white) with no colored accents, ensuring WCAG AA contrast compliance.
 
 ## User Preferences
 
@@ -15,7 +15,7 @@ Preferred communication style: Simple, everyday language.
 - **Routing**: Wouter for client-side routing with pages for Home, Admin, FAQ, and Terms
 - **State Management**: TanStack Query (React Query) for server state management
 - **UI Components**: Custom components built on Radix UI primitives with shadcn/ui design system
-- **Styling**: Tailwind CSS with custom chess-themed color palette and dark mode design
+- **Styling**: Tailwind CSS with strict grayscale palette (black to white only) ensuring WCAG AA contrast compliance
 - **Internationalization**: i18next for bilingual support (Persian RTL/English LTR) with language persistence in localStorage
 - **Forms**: React Hook Form with Zod validation for type-safe form handling
 

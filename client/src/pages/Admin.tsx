@@ -105,7 +105,7 @@ export default function Admin() {
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Create Tournament Form */}
           <div className="bg-chess-card rounded-xl p-6 border border-gray-700">
-            <h2 className="text-xl font-semibold text-chess-accent mb-4">{t('admin.createTournament')}</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">{t('admin.createTournament')}</h2>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
@@ -171,7 +171,7 @@ export default function Admin() {
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          className="data-[state=checked]:bg-chess-accent"
+                          className="data-[state=checked]:bg-white"
                         />
                       </FormControl>
                       <FormLabel className="text-gray-300">{t('admin.openForRegistration')}</FormLabel>
@@ -220,7 +220,7 @@ export default function Admin() {
                 <Button
                   type="submit"
                   disabled={createTournamentMutation.isPending}
-                  className="w-full bg-chess-accent hover:bg-amber-600 text-black font-medium"
+                  className="w-full bg-white hover:bg-gray-200 text-black font-medium"
                 >
                   {createTournamentMutation.isPending ? 'Creating...' : t('admin.create')}
                 </Button>
@@ -230,7 +230,7 @@ export default function Admin() {
 
           {/* Tournament List */}
           <div className="bg-chess-card rounded-xl p-6 border border-gray-700">
-            <h2 className="text-xl font-semibold text-chess-accent mb-4">{t('admin.tournamentList')}</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">{t('admin.tournamentList')}</h2>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {tournaments.map((tournament) => (
                 <div key={tournament.id} className="flex justify-between items-center p-3 bg-chess-dark rounded">
@@ -242,14 +242,14 @@ export default function Admin() {
                   </div>
                   <div className="flex gap-2 items-center">
                     <span className={`px-2 py-1 text-xs rounded ${
-                      tournament.isOpen ? 'bg-chess-success' : 'bg-gray-500'
+                      tournament.isOpen ? 'bg-gray-200 text-black' : 'bg-gray-600 text-white'
                     }`}>
                       {tournament.isOpen ? 'Open' : 'Closed'}
                     </span>
                     <Button
                       size="sm"
                       onClick={() => setNextTournamentMutation.mutate(tournament.id)}
-                      className="bg-chess-accent hover:bg-amber-600 text-black text-xs"
+                      className="bg-white hover:bg-gray-200 text-black text-xs"
                     >
                       Set as Next
                     </Button>
@@ -257,7 +257,7 @@ export default function Admin() {
                       size="sm"
                       variant="outline"
                       onClick={() => setSelectedTournamentId(tournament.id)}
-                      className="border-gray-600 text-gray-300 hover:bg-chess-dark text-xs"
+                      className="border-gray-600 text-gray-300 hover:bg-gray-800 text-xs"
                     >
                       View Registrations
                     </Button>
@@ -271,7 +271,7 @@ export default function Admin() {
         {/* Registrations */}
         {selectedTournamentId && (
           <div className="mt-8 bg-chess-card rounded-xl p-6 border border-gray-700">
-            <h2 className="text-xl font-semibold text-chess-accent mb-4">{t('admin.registrations')}</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">{t('admin.registrations')}</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
@@ -295,7 +295,7 @@ export default function Admin() {
                           href={`/${registration.receiptFilePath}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-chess-accent hover:underline"
+                          className="text-gray-300 hover:text-white hover:underline"
                         >
                           View Receipt
                         </a>

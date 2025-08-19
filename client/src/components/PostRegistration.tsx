@@ -40,7 +40,7 @@ export function PostRegistration({ registration, tournament, onBackToHome }: Pos
         <div className="bg-chess-card rounded-xl p-8 border border-gray-700 shadow-2xl">
           {/* Success Message */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-chess-success rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <i className="fas fa-check text-white text-2xl"></i>
             </div>
             <h2 className="text-3xl font-bold text-white mb-2">{t('registration.success')}</h2>
@@ -49,7 +49,7 @@ export function PostRegistration({ registration, tournament, onBackToHome }: Pos
 
           {/* Tournament Details */}
           <div className="bg-chess-black rounded-lg p-6 mb-6">
-            <h3 className="text-xl font-semibold text-chess-accent mb-4">{t('postRegistration.details')}</h3>
+            <h3 className="text-xl font-semibold text-white mb-4">{t('postRegistration.details')}</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-gray-400">{t('admin.name')}:</span>
@@ -65,14 +65,14 @@ export function PostRegistration({ registration, tournament, onBackToHome }: Pos
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">{t('postRegistration.registrationId')}:</span>
-                <span className="text-chess-accent font-mono">#{registration.id.substring(0, 8).toUpperCase()}</span>
+                <span className="text-gray-300 font-mono">#{registration.id.substring(0, 8).toUpperCase()}</span>
               </div>
             </div>
           </div>
 
           {/* Venue Information */}
           <div className="bg-chess-black rounded-lg p-6 mb-6">
-            <h3 className="text-xl font-semibold text-chess-accent mb-4">{t('postRegistration.venue')}</h3>
+            <h3 className="text-xl font-semibold text-white mb-4">{t('postRegistration.venue')}</h3>
             <div className="space-y-2">
               <p className="text-white">{tournament.venueAddress}</p>
               {tournament.venueInfo && (
@@ -85,7 +85,7 @@ export function PostRegistration({ registration, tournament, onBackToHome }: Pos
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
               onClick={handleDownloadPDF}
-              className="flex-1 bg-chess-accent hover:bg-amber-600 text-black font-semibold py-3 px-6 rounded-lg"
+              className="flex-1 bg-white hover:bg-gray-200 text-black font-semibold py-3 px-6 rounded-lg"
             >
               <i className="fas fa-download mx-2"></i>
               {t('postRegistration.downloadPDF')}
@@ -93,7 +93,7 @@ export function PostRegistration({ registration, tournament, onBackToHome }: Pos
             <Button
               onClick={onBackToHome}
               variant="outline"
-              className="flex-1 border-gray-600 text-white hover:bg-chess-dark"
+              className="flex-1 border-gray-600 text-white hover:bg-gray-800"
             >
               <i className="fas fa-home mx-2"></i>
               {t('postRegistration.backToHome')}

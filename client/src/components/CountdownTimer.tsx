@@ -37,7 +37,7 @@ export function CountdownTimer({ tournament }: CountdownTimerProps) {
   if (!tournament) {
     return (
       <div className="bg-chess-card rounded-xl p-8 mb-12 border border-gray-700 shadow-2xl">
-        <h2 className="text-2xl font-semibold mb-6 text-chess-accent text-center">
+        <h2 className="text-2xl font-semibold mb-6 text-white text-center">
           {t('tournament.noNext')}
         </h2>
       </div>
@@ -46,14 +46,14 @@ export function CountdownTimer({ tournament }: CountdownTimerProps) {
 
   return (
     <div className="bg-chess-card rounded-xl p-8 mb-12 border border-gray-700 shadow-2xl">
-      <h2 className="text-2xl font-semibold mb-6 text-chess-accent text-center">
+      <h2 className="text-2xl font-semibold mb-6 text-white text-center">
         {tournament.name}
       </h2>
       <div className="grid grid-cols-4 gap-4 max-w-md mx-auto">
         {Object.entries(timeLeft).map(([unit, value]) => (
           <div key={unit} className="text-center">
             <div className="bg-chess-black rounded-lg p-4 countdown-digit">
-              <div className="text-3xl font-bold text-chess-accent">
+              <div className="text-3xl font-bold text-white">
                 {value.toString().padStart(2, '0')}
               </div>
               <div className="text-sm text-gray-400">

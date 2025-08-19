@@ -22,7 +22,7 @@ export default function Terms() {
           <h1 className="text-4xl font-bold text-white mb-4">{t('terms.title')}</h1>
           <Button 
             onClick={handleDownload}
-            className="bg-chess-accent hover:bg-amber-600 text-black font-medium"
+            className="bg-white hover:bg-gray-200 text-black font-medium"
           >
             <i className="fas fa-download mx-2"></i>
             {t('terms.download')}

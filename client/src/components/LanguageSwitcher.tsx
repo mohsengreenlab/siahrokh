@@ -16,7 +16,7 @@ export function LanguageSwitcher() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center text-sm text-gray-300 hover:text-chess-accent focus:text-chess-accent transition-colors"
+        className="flex items-center text-sm text-gray-300 hover:text-white focus:text-white transition-colors"
       >
         <i className="fas fa-globe mx-2"></i>
         <span>{currentLangName}</span>
@@ -32,7 +32,7 @@ export function LanguageSwitcher() {
                 changeLanguage(lang.code);
                 setIsOpen(false);
               }}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-chess-accent hover:bg-chess-dark transition-colors"
+              className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
             >
               {lang.name}
             </button>

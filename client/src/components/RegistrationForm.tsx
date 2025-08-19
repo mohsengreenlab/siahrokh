@@ -123,7 +123,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
         <div className="bg-chess-card rounded-xl p-8 border border-gray-700 shadow-2xl">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-2">{t('registration.title')}</h2>
-            <p className="text-chess-accent font-medium">{tournament.name}</p>
+            <p className="text-white font-medium">{tournament.name}</p>
           </div>
 
           <Form {...form}>
@@ -134,16 +134,16 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-gray-300">
-                      {t('registration.fullName')} <span className="text-red-400">*</span>
+                      {t('registration.fullName')} <span className="text-gray-400">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        className="bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-chess-accent"
+                        className="bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-gray-400"
                         placeholder={t('registration.fullName')}
                       />
                     </FormControl>
-                    <FormMessage className="text-red-400" />
+                    <FormMessage className="text-gray-400" />
                   </FormItem>
                 )}
               />
@@ -154,17 +154,17 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-gray-300">
-                      {t('registration.phone')} <span className="text-red-400">*</span>
+                      {t('registration.phone')} <span className="text-gray-400">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="tel"
-                        className="bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-chess-accent"
+                        className="bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-gray-400"
                         placeholder="09123456789"
                       />
                     </FormControl>
-                    <FormMessage className="text-red-400" />
+                    <FormMessage className="text-gray-400" />
                   </FormItem>
                 )}
               />
@@ -175,7 +175,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-gray-300">
-                      {t('registration.receipt')} <span className="text-red-400">*</span>
+                      {t('registration.receipt')} <span className="text-gray-400">*</span>
                     </FormLabel>
                     <FormControl>
                       <div
@@ -187,7 +187,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                         onDrop={handleDrop}
                         onClick={() => document.getElementById('file-input')?.click()}
                       >
-                        <i className="fas fa-cloud-upload-alt text-chess-accent text-4xl mb-4"></i>
+                        <i className="fas fa-cloud-upload-alt text-gray-400 text-4xl mb-4"></i>
                         <p className="text-gray-300 mb-2">{t('registration.fileUpload')}</p>
                         <p className="text-gray-500 text-sm">{t('registration.fileSize')}</p>
                         <input
@@ -206,7 +206,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                       <div className="mt-2">
                         <div className="flex items-center justify-between bg-chess-dark rounded-lg p-3 border border-gray-600">
                           <div className="flex items-center">
-                            <i className="fas fa-file-image text-chess-accent mx-3"></i>
+                            <i className="fas fa-file-image text-gray-400 mx-3"></i>
                             <span className="text-white text-sm">{uploadedFile.name}</span>
                           </div>
                           <button
@@ -215,14 +215,14 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                               setUploadedFile(null);
                               form.setValue('receiptFile', undefined as any);
                             }}
-                            className="text-red-400 hover:text-red-300"
+                            className="text-gray-400 hover:text-gray-300"
                           >
                             <i className="fas fa-trash"></i>
                           </button>
                         </div>
                       </div>
                     )}
-                    <FormMessage className="text-red-400" />
+                    <FormMessage className="text-gray-400" />
                   </FormItem>
                 )}
               />
@@ -237,11 +237,11 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                       <Textarea
                         {...field}
                         rows={4}
-                        className="bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-chess-accent resize-none"
+                        className="bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-gray-400 resize-none"
                         placeholder={t('registration.notes')}
                       />
                     </FormControl>
-                    <FormMessage className="text-red-400" />
+                    <FormMessage className="text-gray-400" />
                   </FormItem>
                 )}
               />
@@ -255,12 +255,12 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="data-[state=checked]:bg-chess-accent data-[state=checked]:border-chess-accent"
+                        className="data-[state=checked]:bg-white data-[state=checked]:border-white"
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel className="text-gray-300 text-sm">
-                        {t('registration.agreeTerms')} <span className="text-red-400">*</span>
+                        {t('registration.agreeTerms')} <span className="text-gray-400">*</span>
                       </FormLabel>
                     </div>
                   </FormItem>
@@ -271,7 +271,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                 <Button
                   type="submit"
                   disabled={mutation.isPending}
-                  className="flex-1 bg-chess-accent hover:bg-amber-600 text-black font-semibold py-4 px-6 rounded-lg"
+                  className="flex-1 bg-white hover:bg-gray-200 text-black font-semibold py-4 px-6 rounded-lg"
                 >
                   {mutation.isPending ? (
                     <>
@@ -286,7 +286,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                   type="button"
                   onClick={onCancel}
                   variant="outline"
-                  className="flex-1 border-gray-600 text-white hover:bg-chess-dark"
+                  className="flex-1 border-gray-600 text-white hover:bg-gray-800"
                 >
                   Cancel
                 </Button>

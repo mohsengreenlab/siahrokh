@@ -22,7 +22,7 @@ export function Header() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <i className="fas fa-chess-king text-chess-accent text-2xl mx-3"></i>
+              <i className="fas fa-chess-king text-white text-2xl mx-3"></i>
               <div>
                 <h1 className="text-xl font-bold text-white">سیاه‌رخ</h1>
                 <p className="text-xs text-gray-400">SiahRokh</p>
@@ -39,8 +39,8 @@ export function Header() {
                   href={item.href}
                   className={`px-3 py-2 text-sm font-medium transition-colors ${
                     location === item.href
-                      ? 'text-chess-accent'
-                      : 'text-gray-300 hover:text-chess-accent'
+                      ? 'text-white font-semibold border-b-2 border-white'
+                      : 'text-gray-300 hover:text-white'
                   }`}
                 >
                   {t(`nav.${item.key}`)}
@@ -58,7 +58,7 @@ export function Header() {
           <div className="md:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-300 hover:text-chess-accent"
+              className="text-gray-300 hover:text-white"
             >
               <i className="fas fa-bars text-xl"></i>
             </button>
@@ -76,8 +76,8 @@ export function Header() {
                 href={item.href}
                 className={`block px-3 py-2 text-base font-medium transition-colors ${
                   location === item.href
-                    ? 'text-chess-accent'
-                    : 'text-gray-300 hover:text-chess-accent'
+                    ? 'text-white font-semibold bg-gray-800'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-800'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
