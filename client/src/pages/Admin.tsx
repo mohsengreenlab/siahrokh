@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { LoginForm } from '@/components/LoginForm';
 import { useAuth } from '@/hooks/useAuth';
 import { TournamentEditForm } from '@/components/TournamentEditForm';
+import { TimePicker } from '@/components/ui/time-picker';
 import { LogOut, Calendar, Filter } from 'lucide-react';
 
 const tournamentSchema = z.object({
@@ -248,9 +249,9 @@ export default function Admin() {
                     <FormItem>
                       <FormLabel className="text-gray-300">{t('admin.time')}</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          type="time"
+                        <TimePicker
+                          value={field.value}
+                          onChange={field.onChange}
                           className="bg-chess-dark border-gray-600 text-white"
                         />
                       </FormControl>

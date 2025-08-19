@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { TimePicker } from '@/components/ui/time-picker';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Edit, Trash2 } from 'lucide-react';
@@ -161,11 +162,10 @@ export function TournamentEditForm({ tournament }: TournamentEditFormProps) {
                     <FormItem>
                       <FormLabel className="text-gray-300">Time</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          type="time"
+                        <TimePicker
+                          value={field.value}
+                          onChange={field.onChange}
                           className="bg-gray-800 border-gray-600 text-white"
-                          data-testid="input-edit-time"
                         />
                       </FormControl>
                       <FormMessage />
