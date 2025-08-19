@@ -170,8 +170,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const errors: string[] = [];
 
       // Manual validation with detailed error messages
-      if (!req.body.name || req.body.name.trim().length < 2) {
-        errors.push("Full name must be at least 2 characters long");
+      if (!req.body.firstName || req.body.firstName.trim().length < 2) {
+        errors.push("First name must be at least 2 characters long");
+      }
+      
+      if (!req.body.lastName || req.body.lastName.trim().length < 2) {
+        errors.push("Last name must be at least 2 characters long");
       }
       
       if (!req.body.phone || req.body.phone.length < 10) {
@@ -220,6 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const registrationData = insertRegistrationSchema.parse({
         ...req.body,
+        name: `${req.body.firstName} ${req.body.lastName}`.trim(),
         yearOfBirth: parseInt(req.body.yearOfBirth),
         receiptFilePath: req.file?.path || '',
         agreedTos: req.body.agreedTos === 'true'

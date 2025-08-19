@@ -70,6 +70,8 @@ export const insertRegistrationSchema = createInsertSchema(registrations).omit({
   certificateId: true,
   certificateConfirmed: true,
   createdAt: true,
+}).extend({
+  yearOfBirth: z.number().int().min(1000).max(9999), // Allow any 4-digit year
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
