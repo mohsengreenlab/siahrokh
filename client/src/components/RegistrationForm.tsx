@@ -22,6 +22,11 @@ const createFormSchema = (t: (key: string) => string) => z.object({
     .min(1, t('errors.required'))
     .min(10, t('errors.phoneMin'))
     .regex(/^[0-9+\-\s()]+$/, t('errors.invalidPhone')),
+  email: z.string()
+    .min(1, t('errors.required'))
+    .email(t('errors.invalidEmail')),
+  dateOfBirth: z.string()
+    .min(1, t('errors.required')),
   receiptFile: z.instanceof(File, { message: t('errors.fileRequired') })
     .refine((file) => file.size <= 10 * 1024 * 1024, t('errors.fileTooLarge'))
     .refine(
@@ -56,6 +61,8 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
     defaultValues: {
       name: '',
       phone: '',
+      email: '',
+      dateOfBirth: '',
       description: '',
       agreedTos: false
     }
@@ -76,6 +83,8 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
       formData.append('tournamentId', tournament.id);
       formData.append('name', data.name);
       formData.append('phone', data.phone);
+      formData.append('email', data.email);
+      formData.append('dateOfBirth', data.dateOfBirth);
       formData.append('receiptFile', data.receiptFile);
       formData.append('description', data.description || '');
       formData.append('agreedTos', data.agreedTos.toString());
@@ -174,6 +183,8 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
     
     if (errors.name) errorList.push(errors.name.message || t('errors.required'));
     if (errors.phone) errorList.push(errors.phone.message || t('errors.invalidPhone'));
+    if (errors.email) errorList.push(errors.email.message || t('errors.invalidEmail'));
+    if (errors.dateOfBirth) errorList.push(errors.dateOfBirth.message || t('errors.required'));
     if (errors.receiptFile) errorList.push(errors.receiptFile.message || t('errors.fileRequired'));
     if (errors.agreedTos) errorList.push(errors.agreedTos.message || t('errors.tosRequired'));
     
@@ -273,6 +284,63 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                     </FormControl>
                     <FormMessage 
                       id="phone-error" 
+                      className="text-red-400" 
+                    />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-300">
+                      {t('registration.email')} <span className="text-gray-400">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="email"
+                        data-testid="input-email"
+                        className={`bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-gray-400 ${
+                          form.formState.errors.email ? 'border-red-500 focus:border-red-400' : ''
+                        }`}
+                        placeholder="example@email.com"
+                        aria-invalid={!!form.formState.errors.email}
+                        aria-describedby={form.formState.errors.email ? 'email-error' : undefined}
+                      />
+                    </FormControl>
+                    <FormMessage 
+                      id="email-error" 
+                      className="text-red-400" 
+                    />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="dateOfBirth"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-300">
+                      {t('registration.dateOfBirth')} <span className="text-gray-400">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="date"
+                        data-testid="input-date-of-birth"
+                        className={`bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-gray-400 ${
+                          form.formState.errors.dateOfBirth ? 'border-red-500 focus:border-red-400' : ''
+                        }`}
+                        aria-invalid={!!form.formState.errors.dateOfBirth}
+                        aria-describedby={form.formState.errors.dateOfBirth ? 'date-error' : undefined}
+                      />
+                    </FormControl>
+                    <FormMessage 
+                      id="date-error" 
                       className="text-red-400" 
                     />
                   </FormItem>

@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Admin from "./pages/Admin";
 import FAQ from "./pages/FAQ";
 import Terms from "./pages/Terms";
+import { Certificate } from "./pages/Certificate";
 import NotFound from "@/pages/not-found";
 import './lib/i18n';
 
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/admin24" component={Admin} />
       <Route path="/faq" component={FAQ} />
       <Route path="/terms" component={Terms} />
+      <Route path="/certificate" component={Certificate} />
       <Route component={NotFound} />
     </Switch>
   );

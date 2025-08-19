@@ -177,6 +177,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.body.phone || req.body.phone.length < 10) {
         errors.push("Phone number must be at least 10 digits");
       }
+
+      if (!req.body.email || !req.body.email.includes('@')) {
+        errors.push("Valid email address is required");
+      }
+
+      if (!req.body.dateOfBirth) {
+        errors.push("Date of birth is required");
+      }
       
       if (!req.file) {
         errors.push("Receipt file is required");
@@ -210,6 +218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const registrationData = insertRegistrationSchema.parse({
         ...req.body,
+        dateOfBirth: new Date(req.body.dateOfBirth),
         receiptFilePath: req.file?.path || '',
         agreedTos: req.body.agreedTos === 'true'
       });
@@ -403,6 +412,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('PDF generation error:', error);
       res.status(500).json({ error: "Failed to generate PDF" });
+    }
+  });
+
+  // Certificate validation endpoint
+  app.get("/api/certificates/:certificateId", async (req, res) => {
+    try {
+      const certificateId = req.params.certificateId.toUpperCase().trim();
+      
+      if (!certificateId || certificateId.length !== 10) {
+        return res.status(400).json({ 
+          error: "Invalid certificate format",
+          message: "Certificate ID must be exactly 10 characters (5 digits + 5 letters)"
+        });
+      }
+
+      const registration = await storage.getRegistrationByCertificateId(certificateId);
+      
+      if (!registration) {
+        return res.status(404).json({ 
+          error: "Certificate not found",
+          message: "This certificate ID does not exist in our records"
+        });
+      }
+
+      const tournament = await storage.getTournament(registration.tournamentId);
+      
+      if (!tournament) {
+        return res.status(404).json({ 
+          error: "Tournament not found",
+          message: "The tournament associated with this certificate could not be found"
+        });
+      }
+
+      res.json({
+        valid: true,
+        certificateId: registration.certificateId,
+        participant: {
+          name: registration.name,
+          email: registration.email,
+          registrationDate: registration.createdAt
+        },
+        tournament: {
+          name: tournament.name,
+          date: tournament.date,
+          venue: tournament.venueAddress
+        }
+      });
+    } catch (error) {
+      console.error('Certificate validation error:', error);
+      res.status(500).json({ error: "Failed to validate certificate" });
     }
   });
 

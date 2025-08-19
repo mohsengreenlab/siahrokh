@@ -95,6 +95,23 @@ export function PostRegistration({ registration, tournament, onBackToHome }: Pos
                 <span className="text-gray-400">{t('postRegistration.registrationId')}:</span>
                 <span className="text-gray-300 font-mono">#{registration.id.substring(0, 8).toUpperCase()}</span>
               </div>
+              {registration.certificateId && (
+                <div className="flex justify-between">
+                  <span className="text-gray-400">{t('postRegistration.certificateId')}:</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-white bg-green-900/30 px-2 py-1 rounded border border-green-600">
+                      {registration.certificateId}
+                    </span>
+                    <a
+                      href={`/certificate?id=${registration.certificateId}`}
+                      className="text-blue-400 hover:text-blue-300 text-sm underline"
+                      title="Verify certificate"
+                    >
+                      Verify
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

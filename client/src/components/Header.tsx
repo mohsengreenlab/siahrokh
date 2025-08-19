@@ -11,6 +11,7 @@ export function Header() {
   const navigation = [
     { key: 'home', href: '/' },
     { key: 'tournaments', href: '/#tournaments' },
+    { key: 'certificate', href: '/certificate' },
     { key: 'faq', href: '/faq' },
     { key: 'terms', href: '/terms' }
   ];

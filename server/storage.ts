@@ -26,6 +26,7 @@ export interface IStorage {
   getRegistration(id: string): Promise<Registration | undefined>;
   getRegistrations(tournamentId?: string, search?: string): Promise<Registration[]>;
   createRegistration(insertRegistration: InsertRegistration): Promise<Registration>;
+  getRegistrationByCertificateId(certificateId: string): Promise<Registration | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -134,12 +135,54 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(registrations).orderBy(desc(registrations.createdAt));
   }
 
+  // Generate unique certificate ID (5 digits + 5 letters)
+  private generateCertificateId(): string {
+    const digits = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
+    const letters = Array.from({ length: 5 }, () => 
+      String.fromCharCode(65 + Math.floor(Math.random() * 26))
+    ).join('');
+    return digits + letters;
+  }
+
   async createRegistration(insertRegistration: InsertRegistration): Promise<Registration> {
+    let certificateId: string;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    // Generate unique certificate ID with retry logic
+    do {
+      certificateId = this.generateCertificateId();
+      attempts++;
+      
+      // Check if certificate ID already exists
+      const existing = await db
+        .select()
+        .from(registrations)
+        .where(eq(registrations.certificateId, certificateId))
+        .limit(1);
+      
+      if (existing.length === 0) break;
+      
+      if (attempts >= maxAttempts) {
+        throw new Error('Unable to generate unique certificate ID after multiple attempts');
+      }
+    } while (true);
+
     const [registration] = await db
       .insert(registrations)
-      .values(insertRegistration)
+      .values({ ...insertRegistration, certificateId })
       .returning();
     return registration;
+  }
+
+  // Certificate validation method
+  async getRegistrationByCertificateId(certificateId: string): Promise<Registration | undefined> {
+    const [registration] = await db
+      .select()
+      .from(registrations)
+      .where(eq(registrations.certificateId, certificateId))
+      .limit(1);
+    return registration || undefined;
   }
 }
 
