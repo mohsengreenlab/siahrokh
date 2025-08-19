@@ -252,155 +252,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Tournament not found" });
       }
 
-      // Create HTML template first
+      // Create simple HTML template with table
       const html = `
         <!DOCTYPE html>
-        <html dir="rtl" lang="fa">
+        <html>
         <head>
           <meta charset="UTF-8">
           <style>
-            @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap');
-            
-            * { box-sizing: border-box; }
-            
             body { 
-              font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif; 
-              direction: rtl; 
-              text-align: right; 
-              margin: 40px; 
-              line-height: 1.6;
+              font-family: Arial, sans-serif; 
+              margin: 20px; 
               font-size: 14px;
               color: #000;
               background: #fff;
             }
-            
             .header { 
               text-align: center; 
-              margin-bottom: 40px; 
+              margin-bottom: 30px; 
               border-bottom: 2px solid #000;
-              padding-bottom: 20px;
+              padding-bottom: 15px;
             }
-            
             .header h1 {
-              font-size: 24px;
-              font-weight: 700;
+              font-size: 20px;
               margin: 0 0 10px 0;
               color: #000;
             }
-            
-            .header p {
-              margin: 5px 0;
-              font-size: 16px;
-              color: #333;
+            table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              margin-bottom: 20px;
             }
-            
-            .info-section { 
-              margin-bottom: 30px; 
-              padding: 20px; 
-              border: 2px solid #000; 
-              border-radius: 8px;
-              background: #f9f9f9;
+            th, td { 
+              border: 1px solid #000; 
+              padding: 8px; 
+              text-align: left;
             }
-            
-            .info-section h2 {
-              font-size: 18px;
-              font-weight: 600;
-              margin: 0 0 15px 0;
-              color: #000;
-              border-bottom: 1px solid #ccc;
-              padding-bottom: 5px;
+            th { 
+              background-color: #f0f0f0; 
+              font-weight: bold;
             }
-            
-            .info-row { 
-              margin-bottom: 12px; 
-              display: flex;
-              align-items: center;
-            }
-            
-            .label { 
-              font-weight: 600; 
-              display: inline-block; 
-              width: 150px; 
-              color: #000;
-            }
-            
-            .value { 
-              color: #333; 
-              flex: 1;
-              font-size: 14px;
+            .section-header {
+              background-color: #e0e0e0;
+              font-weight: bold;
+              text-align: center;
             }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1>جزئیات ثبت‌نام تورنمنت</h1>
-            <p>سیاه‌رخ - مرکز تورنمنت‌های شطرنج</p>
+            <h1>SiahRokh Chess Tournament Registration</h1>
+            <p>Tournament Registration Details</p>
             <p>siahrokh.ir</p>
           </div>
           
-          <div class="info-section">
-            <h2>اطلاعات تورنمنت</h2>
-            <div class="info-row">
-              <span class="label">نام تورنمنت:</span>
-              <span class="value">${tournament.name}</span>
-            </div>
-            <div class="info-row">
-              <span class="label">تاریخ:</span>
-              <span class="value">${new Date(tournament.date).toLocaleDateString('fa-IR')}</span>
-            </div>
-            <div class="info-row">
-              <span class="label">زمان:</span>
-              <span class="value">${tournament.time}</span>
-            </div>
-          </div>
+          <table>
+            <tr class="section-header">
+              <td colspan="2">TOURNAMENT INFORMATION</td>
+            </tr>
+            <tr>
+              <th>Tournament Name</th>
+              <td>${tournament.name}</td>
+            </tr>
+            <tr>
+              <th>Date</th>
+              <td>${new Date(tournament.date).toLocaleDateString()}</td>
+            </tr>
+            <tr>
+              <th>Time</th>
+              <td>${tournament.time}</td>
+            </tr>
+            <tr>
+              <th>Registration Status</th>
+              <td>${tournament.isOpen ? 'Open' : 'Closed'}</td>
+            </tr>
+          </table>
 
-          <div class="info-section">
-            <h2>اطلاعات شرکت‌کننده</h2>
-            <div class="info-row">
-              <span class="label">نام و نام خانوادگی:</span>
-              <span class="value">${registration.name}</span>
-            </div>
-            <div class="info-row">
-              <span class="label">شماره تلفن:</span>
-              <span class="value">${registration.phone}</span>
-            </div>
-            <div class="info-row">
-              <span class="label">شماره ثبت‌نام:</span>
-              <span class="value">#${registration.id.substring(0, 8).toUpperCase()}</span>
-            </div>
+          <table>
+            <tr class="section-header">
+              <td colspan="2">PARTICIPANT INFORMATION</td>
+            </tr>
+            <tr>
+              <th>Full Name</th>
+              <td>${registration.name}</td>
+            </tr>
+            <tr>
+              <th>Phone Number</th>
+              <td>${registration.phone}</td>
+            </tr>
+            <tr>
+              <th>Registration ID</th>
+              <td>#${registration.id.substring(0, 8).toUpperCase()}</td>
+            </tr>
+            <tr>
+              <th>Registration Date</th>
+              <td>${new Date(registration.createdAt).toLocaleDateString()}</td>
+            </tr>
             ${registration.description ? `
-            <div class="info-row">
-              <span class="label">توضیحات:</span>
-              <span class="value">${registration.description}</span>
-            </div>
+            <tr>
+              <th>Notes</th>
+              <td>${registration.description}</td>
+            </tr>
             ` : ''}
-          </div>
+          </table>
 
-          <div class="info-section">
-            <h2>محل برگزاری</h2>
-            <div class="info-row">
-              <span class="label">آدرس:</span>
-              <span class="value">${tournament.venueAddress}</span>
-            </div>
+          <table>
+            <tr class="section-header">
+              <td colspan="2">VENUE INFORMATION</td>
+            </tr>
+            <tr>
+              <th>Address</th>
+              <td>${tournament.venueAddress}</td>
+            </tr>
             ${tournament.venueInfo ? `
-            <div class="info-row">
-              <span class="label">توضیحات:</span>
-              <span class="value">${tournament.venueInfo}</span>
-            </div>
+            <tr>
+              <th>Additional Info</th>
+              <td>${tournament.venueInfo}</td>
+            </tr>
             ` : ''}
-          </div>
-          
-          <div class="info-section">
-            <h2>تایید ثبت‌نام</h2>
-            <div class="info-row">
-              <span class="label">وضعیت:</span>
-              <span class="value">ثبت‌نام با موفقیت انجام شده</span>
-            </div>
-            <div class="info-row">
-              <span class="label">تاریخ ثبت‌نام:</span>
-              <span class="value">${new Date(registration.createdAt).toLocaleDateString('fa-IR')}</span>
-            </div>
-          </div>
+          </table>
         </body>
         </html>
       `;
@@ -442,16 +411,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      await page.setContent(html, { waitUntil: 'domcontentloaded' });
       
-      // Wait for fonts to load
-      await page.evaluateHandle('document.fonts.ready');
+      // Add a small delay to ensure content is rendered
+      await page.waitForTimeout(1000);
       
       const pdf = await page.pdf({
         format: 'A4',
-        margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' },
-        printBackground: true,
-        preferCSSPageSize: true
+        margin: { top: '20mm', right: '15mm', bottom: '20mm', left: '15mm' },
+        printBackground: true
       });
 
       await browser.close();
