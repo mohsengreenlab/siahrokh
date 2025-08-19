@@ -48,12 +48,12 @@ export function TournamentEditForm({ tournament }: TournamentEditFormProps) {
       const response = await fetch(`/api/admin/tournaments/${tournament.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...data,
-          date: new Date(data.date + 'T' + data.time).toISOString()
-        })
+        body: JSON.stringify(data)
       });
-      if (!response.ok) throw new Error('Failed to update tournament');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update tournament');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -63,8 +63,8 @@ export function TournamentEditForm({ tournament }: TournamentEditFormProps) {
       queryClient.invalidateQueries({ queryKey: ['/api/tournaments'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tournaments/next'] });
     },
-    onError: () => {
-      toast({ title: 'Error updating tournament', variant: 'destructive' });
+    onError: (error: Error) => {
+      toast({ title: error.message || 'Error updating tournament', variant: 'destructive' });
     }
   });
 

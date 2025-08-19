@@ -240,7 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/registrations/:id/pdf", async (req, res) => {
     try {
       // Allow access for admin users or anyone for now (TODO: implement token-based auth for registrants)
-      const isAdmin = req.session?.user === 'admin';
+      const isAdmin = (req.session as any)?.user === 'admin';
       
       const registration = await storage.getRegistration(req.params.id);
       if (!registration) {
@@ -252,19 +252,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Tournament not found" });
       }
 
-      const browser = await puppeteer.launch({ 
-        headless: true,
-        executablePath: '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu'
-        ]
-      });
+      // Try Puppeteer with timeout, fallback to HTML response
+      let browser;
+      try {
+        browser = await Promise.race([
+          puppeteer.launch({ 
+            headless: true,
+            executablePath: '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
+            args: [
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-accelerated-2d-canvas',
+              '--no-first-run',
+              '--no-zygote',
+              '--disable-gpu',
+              '--disable-extensions',
+              '--disable-background-timer-throttling',
+              '--disable-backgrounding-occluded-windows',
+              '--disable-renderer-backgrounding',
+              '--disable-features=TranslateUI',
+              '--disable-ipc-flooding-protection'
+            ]
+          }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Browser launch timeout')), 10000)
+          )
+        ]);
+      } catch (browserError) {
+        console.error('Browser launch failed, sending HTML instead:', browserError.message);
+        
+        // Send HTML content directly for user to save/print as PDF
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Content-Disposition', `inline; filename="tournament-${registration.id}.html"`);
+        return res.send(html);
+      }
       const page = await browser.newPage();
 
       const html = `
@@ -421,26 +443,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/tournaments/:id", requireAuth, async (req, res) => {
     try {
-      let tournamentData = req.body;
+      const { name, date, time, isOpen, venueAddress, venueInfo } = req.body;
       
-      // Convert date+time from frontend format to proper Date object
-      if (typeof tournamentData.date === 'string' && tournamentData.time) {
-        const combinedDateTime = new Date(tournamentData.date + 'T' + tournamentData.time);
-        tournamentData = {
-          ...tournamentData,
-          date: combinedDateTime
-        };
+      // Validate date and time inputs
+      if (!date || !time) {
+        return res.status(400).json({ error: "Date and time are required" });
       }
       
-      // Skip Zod validation and update tournament directly with proper typing
+      // Create proper Date object from date and time strings
+      const combinedDateTime = new Date(`${date}T${time}:00`);
+      
+      // Check if date is valid
+      if (isNaN(combinedDateTime.getTime())) {
+        return res.status(400).json({ error: "Invalid date or time format" });
+      }
+      
       const tournamentToUpdate = {
-        name: tournamentData.name,
-        date: tournamentData.date instanceof Date ? tournamentData.date : new Date(tournamentData.date),
-        time: tournamentData.time,
-        isOpen: Boolean(tournamentData.isOpen),
-        venueAddress: tournamentData.venueAddress,
-        venueInfo: tournamentData.venueInfo || null
+        name: name?.trim(),
+        date: combinedDateTime,
+        time: time,
+        isOpen: Boolean(isOpen),
+        venueAddress: venueAddress?.trim(),
+        venueInfo: venueInfo?.trim() || null
       } as InsertTournament;
+      
+      console.log('Updating tournament with data:', tournamentToUpdate);
       
       const tournament = await storage.updateTournament(req.params.id, tournamentToUpdate);
       res.json(tournament);

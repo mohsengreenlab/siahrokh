@@ -20,15 +20,29 @@ export function PostRegistration({ registration, tournament, onBackToHome }: Pos
     try {
       const response = await fetch(`/api/registrations/${registration.id}/pdf`);
       if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `registration-${registration.id}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+        const contentType = response.headers.get('content-type');
+        
+        if (contentType?.includes('application/pdf')) {
+          // PDF was successfully generated
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `registration-${registration.id}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } else if (contentType?.includes('text/html')) {
+          // HTML fallback - open in new window for user to print/save as PDF
+          const htmlContent = await response.text();
+          const newWindow = window.open('', '_blank');
+          if (newWindow) {
+            newWindow.document.write(htmlContent);
+            newWindow.document.close();
+            console.log('PDF service unavailable. Opening printable version in new window.');
+          }
+        }
       } else {
         console.error('Failed to generate PDF:', response.status);
         console.error("Couldn't generate PDF. Please try again.");
