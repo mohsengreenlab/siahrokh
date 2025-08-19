@@ -56,10 +56,11 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Apply public rate limiter to non-admin routes
-  app.use('/api/', (req, res, next) => {
+  // Apply rate limiter only to public API routes (exclude admin routes)
+  app.use('/api', (req, res, next) => {
     if (req.path.startsWith('/admin')) {
-      adminLimiter(req, res, next);
+      // Skip rate limiting for admin routes
+      next();
     } else {
       publicLimiter(req, res, next);
     }
