@@ -330,7 +330,7 @@ export default function Admin() {
                       <td className="p-3">
                         {registration.receiptFilePath ? (
                           <a
-                            href={`/${registration.receiptFilePath}`}
+                            href={`/uploads/${registration.receiptFilePath.split('/').pop()}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 hover:underline"
