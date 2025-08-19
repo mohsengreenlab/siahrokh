@@ -115,7 +115,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             <div>
               <div className="flex items-center mb-4">
-                <i className="fas fa-chess-king text-chess-accent text-2xl mx-3"></i>
+                <img src="/assets/Gemini_Generated_Image_yguf2iyguf2iyguf_1755644880540.png" alt="SiahRokh Logo" className="w-8 h-8 mx-3" />
                 <div>
                   <h3 className="text-xl font-bold text-white">سیاه‌رخ</h3>
                   <p className="text-xs text-gray-400">SiahRokh</p>

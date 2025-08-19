@@ -23,7 +23,7 @@ export function Header() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <i className="fas fa-chess-king text-white text-2xl mx-3"></i>
+              <img src="/assets/Gemini_Generated_Image_yguf2iyguf2iyguf_1755644880540.png" alt="SiahRokh Logo" className="w-8 h-8 mx-3" />
               <div>
                 <h1 className="text-xl font-bold text-white">سیاه‌رخ</h1>
                 <p className="text-xs text-gray-400">SiahRokh</p>
