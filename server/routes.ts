@@ -182,8 +182,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         errors.push("Valid email address is required");
       }
 
-      if (!req.body.dateOfBirth) {
-        errors.push("Date of birth is required");
+      if (!req.body.yearOfBirth) {
+        errors.push("Year of birth is required");
+      } else {
+        const year = parseInt(req.body.yearOfBirth);
+        const currentYear = new Date().getFullYear();
+        if (isNaN(year) || year < 1900 || year > currentYear) {
+          errors.push("Please enter a valid year between 1900 and current year");
+        }
       }
       
       if (!req.file) {
@@ -218,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const registrationData = insertRegistrationSchema.parse({
         ...req.body,
-        dateOfBirth: new Date(req.body.dateOfBirth),
+        yearOfBirth: parseInt(req.body.yearOfBirth),
         receiptFilePath: req.file?.path || '',
         agreedTos: req.body.agreedTos === 'true'
       });
@@ -590,6 +596,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(registrations);
     } catch (error) {
       res.status(400).json({ error: error instanceof Error ? error.message : "Failed to fetch registrations" });
+    }
+  });
+
+  app.post("/api/admin/registrations/:id/confirm-certificate", requireAuth, async (req, res) => {
+    try {
+      const registrationId = req.params.id;
+      const result = await storage.confirmCertificate(registrationId);
+      res.json(result);
+    } catch (error) {
+      res.status(400).json({ error: error instanceof Error ? error.message : "Failed to confirm certificate" });
     }
   });
 

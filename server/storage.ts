@@ -26,6 +26,7 @@ export interface IStorage {
   getRegistrations(tournamentId?: string, search?: string): Promise<Registration[]>;
   createRegistration(insertRegistration: InsertRegistration): Promise<Registration>;
   getRegistrationByCertificateId(certificateId: string): Promise<Registration | undefined>;
+  confirmCertificate(registrationId: string): Promise<Registration>;
 }
 
 // DatabaseStorage is only available when DATABASE_URL is set
@@ -199,6 +200,15 @@ class DatabaseStorage implements IStorage {
       .limit(1);
     return registration || undefined;
   }
+
+  async confirmCertificate(registrationId: string): Promise<Registration> {
+    const [registration] = await this.db
+      .update(registrations)
+      .set({ certificateConfirmed: true })
+      .where(this.eq(registrations.id, registrationId))
+      .returning();
+    return registration;
+  }
 }
 
 // Memory-based storage for development when database is not available
@@ -357,6 +367,7 @@ export class MemoryStorage implements IStorage {
       id: uuidv4(),
       agreedTos: false, // Default value
       description: null, // Default value
+      certificateConfirmed: false, // Default value
       ...insertRegistration,
       certificateId,
       createdAt: new Date(),
@@ -367,6 +378,15 @@ export class MemoryStorage implements IStorage {
 
   async getRegistrationByCertificateId(certificateId: string): Promise<Registration | undefined> {
     return this.registrations.find(r => r.certificateId === certificateId);
+  }
+
+  async confirmCertificate(registrationId: string): Promise<Registration> {
+    const registration = this.registrations.find(r => r.id === registrationId);
+    if (!registration) {
+      throw new Error('Registration not found');
+    }
+    registration.certificateConfirmed = true;
+    return registration;
   }
 }
 

@@ -128,7 +128,7 @@ export default function Home() {
                 <a href="#" className="text-gray-400 hover:text-chess-accent">
                   <i className="fab fa-telegram"></i>
                 </a>
-                <a href="#" className="text-gray-400 hover:text-chess-accent">
+                <a href="https://instagram.com/siah_rokh" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-chess-accent">
                   <i className="fab fa-instagram"></i>
                 </a>
                 <a href="#" className="text-gray-400 hover:text-chess-accent">
@@ -149,10 +149,6 @@ export default function Home() {
             <div>
               <h4 className="text-lg font-semibold text-white mb-4">{t('footer.contact')}</h4>
               <div className="space-y-2">
-                <p className="text-gray-400">
-                  <i className="fas fa-phone mx-2 text-chess-accent"></i>
-                  {t('footer.phone')}
-                </p>
                 <p className="text-gray-400">
                   <i className="fas fa-envelope mx-2 text-chess-accent"></i>
                   {t('footer.email')}

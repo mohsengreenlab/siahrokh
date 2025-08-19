@@ -29,7 +29,7 @@
     "fullName": "Full Name",
     "phone": "Phone Number",
     "email": "Email Address",
-    "dateOfBirth": "Date of Birth",
+    "yearOfBirth": "Year of Birth",
     "receipt": "Fee Payment Receipt",
     "notes": "Notes (Optional)",
     "agreeTerms": "I have read and agree to the Terms of Service",
@@ -39,7 +39,8 @@
     "required": "*",
     "success": "Registration completed successfully!",
     "successSubtitle": "Tournament details have been sent to you",
-    "uploadSuccess": "File uploaded successfully"
+    "uploadSuccess": "File uploaded successfully",
+    "uploading": "Uploading..."
   },
   "postRegistration": {
     "details": "Tournament Details",
@@ -121,6 +122,8 @@
     "nameMin": "Full name must be at least 2 characters long",
     "phoneMin": "Phone number must be at least 10 digits",
     "validationSummary": "Please fix the following errors:",
-    "serverError": "Registration failed. Please check your information and try again."
+    "serverError": "Registration failed. Please check your information and try again.",
+    "invalidYear": "Please enter a 4-digit year",
+    "yearOutOfRange": "Year must be between 1900 and current year"
   }
 }

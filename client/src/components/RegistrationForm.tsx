@@ -25,8 +25,14 @@ const createFormSchema = (t: (key: string) => string) => z.object({
   email: z.string()
     .min(1, t('errors.required'))
     .email(t('errors.invalidEmail')),
-  dateOfBirth: z.string()
-    .min(1, t('errors.required')),
+  yearOfBirth: z.string()
+    .min(1, t('errors.required'))
+    .regex(/^\d{4}$/, t('errors.invalidYear'))
+    .refine((year) => {
+      const currentYear = new Date().getFullYear();
+      const birthYear = parseInt(year);
+      return birthYear >= 1900 && birthYear <= currentYear;
+    }, t('errors.yearOutOfRange')),
   receiptFile: z.instanceof(File, { message: t('errors.fileRequired') })
     .refine((file) => file.size <= 10 * 1024 * 1024, t('errors.fileTooLarge'))
     .refine(
@@ -52,6 +58,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
   const queryClient = useQueryClient();
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [serverErrors, setServerErrors] = useState<string[]>([]);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const formSchema = createFormSchema(t);
@@ -62,7 +69,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
       name: '',
       phone: '',
       email: '',
-      dateOfBirth: '',
+      yearOfBirth: '',
       description: '',
       agreedTos: false
     }
@@ -79,12 +86,13 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
+      setIsUploading(true);
       const formData = new FormData();
       formData.append('tournamentId', tournament.id);
       formData.append('name', data.name);
       formData.append('phone', data.phone);
       formData.append('email', data.email);
-      formData.append('dateOfBirth', data.dateOfBirth);
+      formData.append('yearOfBirth', data.yearOfBirth);
       formData.append('receiptFile', data.receiptFile);
       formData.append('description', data.description || '');
       formData.append('agreedTos', data.agreedTos.toString());
@@ -104,6 +112,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
       return response.json();
     },
     onSuccess: (data) => {
+      setIsUploading(false);
       setServerErrors([]);
       toast({
         title: t('registration.success'),
@@ -113,6 +122,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
       queryClient.invalidateQueries({ queryKey: ['/api/tournaments'] });
     },
     onError: (error: any) => {
+      setIsUploading(false);
       let errorMessages: string[] = [];
       
       // Check if server errors are attached to the error object
@@ -184,7 +194,7 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
     if (errors.name) errorList.push(errors.name.message || t('errors.required'));
     if (errors.phone) errorList.push(errors.phone.message || t('errors.invalidPhone'));
     if (errors.email) errorList.push(errors.email.message || t('errors.invalidEmail'));
-    if (errors.dateOfBirth) errorList.push(errors.dateOfBirth.message || t('errors.required'));
+    if (errors.yearOfBirth) errorList.push(errors.yearOfBirth.message || t('errors.required'));
     if (errors.receiptFile) errorList.push(errors.receiptFile.message || t('errors.fileRequired'));
     if (errors.agreedTos) errorList.push(errors.agreedTos.message || t('errors.tosRequired'));
     
@@ -321,26 +331,29 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
 
               <FormField
                 control={form.control}
-                name="dateOfBirth"
+                name="yearOfBirth"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-gray-300">
-                      {t('registration.dateOfBirth')} <span className="text-gray-400">*</span>
+                      {t('registration.yearOfBirth')} <span className="text-gray-400">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        type="date"
-                        data-testid="input-date-of-birth"
+                        type="number"
+                        min="1900"
+                        max={new Date().getFullYear()}
+                        placeholder="1990"
+                        data-testid="input-year-of-birth"
                         className={`bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-gray-400 ${
-                          form.formState.errors.dateOfBirth ? 'border-red-500 focus:border-red-400' : ''
+                          form.formState.errors.yearOfBirth ? 'border-red-500 focus:border-red-400' : ''
                         }`}
-                        aria-invalid={!!form.formState.errors.dateOfBirth}
-                        aria-describedby={form.formState.errors.dateOfBirth ? 'date-error' : undefined}
+                        aria-invalid={!!form.formState.errors.yearOfBirth}
+                        aria-describedby={form.formState.errors.yearOfBirth ? 'year-error' : undefined}
                       />
                     </FormControl>
                     <FormMessage 
-                      id="date-error" 
+                      id="year-error" 
                       className="text-red-400" 
                     />
                   </FormItem>
@@ -380,9 +393,18 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                         aria-invalid={!!form.formState.errors.receiptFile}
                         aria-describedby={form.formState.errors.receiptFile ? 'file-error' : undefined}
                       >
-                        <i className="fas fa-cloud-upload-alt text-gray-400 text-4xl mb-4"></i>
-                        <p className="text-gray-300 mb-2">{t('registration.fileUpload')}</p>
-                        <p className="text-gray-500 text-sm">{t('registration.fileSize')}</p>
+                        {isUploading ? (
+                          <>
+                            <div className="animate-spin inline-block w-8 h-8 border-4 border-gray-600 border-t-white rounded-full mb-4"></div>
+                            <p className="text-white mb-2">{t('registration.uploading')}</p>
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-cloud-upload-alt text-gray-400 text-4xl mb-4"></i>
+                            <p className="text-gray-300 mb-2">{t('registration.fileUpload')}</p>
+                            <p className="text-gray-500 text-sm">{t('registration.fileSize')}</p>
+                          </>
+                        )}
                         <input
                           id="file-input"
                           type="file"
@@ -479,13 +501,13 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                 <Button
                   type="submit"
                   data-testid="button-submit"
-                  disabled={mutation.isPending}
-                  className="flex-1 bg-white hover:bg-gray-200 text-black font-semibold py-4 px-6 rounded-lg"
+                  disabled={mutation.isPending || isUploading}
+                  className="flex-1 bg-white hover:bg-gray-200 text-black font-semibold py-4 px-6 rounded-lg disabled:opacity-50"
                 >
-                  {mutation.isPending ? (
+                  {mutation.isPending || isUploading ? (
                     <>
                       <i className="fas fa-spinner fa-spin mx-2"></i>
-                      {t('registration.submit')}
+                      {isUploading ? t('registration.uploading') : t('registration.submit')}
                     </>
                   ) : (
                     t('registration.submit')

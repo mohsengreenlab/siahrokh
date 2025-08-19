@@ -28,11 +28,12 @@ export const registrations = pgTable("registrations", {
   name: text("name").notNull(),
   phone: text("phone").notNull(),
   email: text("email").notNull(),
-  dateOfBirth: timestamp("date_of_birth", { withTimezone: true }).notNull(),
+  yearOfBirth: integer("year_of_birth").notNull(),
   receiptFilePath: text("receipt_file_path").notNull(),
   agreedTos: boolean("agreed_tos").notNull().default(false),
   description: text("description"),
   certificateId: varchar("certificate_id", { length: 10 }).notNull().unique(),
+  certificateConfirmed: boolean("certificate_confirmed").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
 });
 
@@ -67,6 +68,7 @@ export const insertTournamentSchema = createInsertSchema(tournaments).omit({
 export const insertRegistrationSchema = createInsertSchema(registrations).omit({
   id: true,
   certificateId: true,
+  certificateConfirmed: true,
   createdAt: true,
 });
 

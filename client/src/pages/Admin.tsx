@@ -131,6 +131,28 @@ export default function Admin() {
     }
   });
 
+  const confirmCertificateMutation = useMutation({
+    mutationFn: async (registrationId: string) => {
+      const response = await fetch(`/api/admin/registrations/${registrationId}/confirm-certificate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) throw new Error('Failed to confirm certificate');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: 'Certificate confirmed successfully' });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/registrations', selectedTournamentId] });
+    },
+    onError: () => {
+      toast({ title: 'Error confirming certificate', variant: 'destructive' });
+    }
+  });
+
+  const handleConfirmCertificate = (registrationId: string) => {
+    confirmCertificateMutation.mutate(registrationId);
+  };
+
   const onSubmit = (data: z.infer<typeof tournamentSchema>) => {
     createTournamentMutation.mutate(data);
   };
@@ -383,18 +405,21 @@ export default function Admin() {
                 <thead>
                   <tr className="border-b border-gray-600">
                     <th className="p-3 text-gray-300 font-medium">Full Name</th>
+                    <th className="p-3 text-gray-300 font-medium">Year of Birth</th>
                     <th className="p-3 text-gray-300 font-medium">Phone Number</th>
                     <th className="p-3 text-gray-300 font-medium">Notes</th>
-                    <th className="p-3 text-gray-300 font-medium">Terms Agreed</th>
+                    <th className="p-3 text-gray-300 font-medium">Certificate Status</th>
                     <th className="p-3 text-gray-300 font-medium">Registration Date</th>
                     <th className="p-3 text-gray-300 font-medium">Receipt File</th>
-                    <th className="p-3 text-gray-300 font-medium">Registration ID</th>
+                    <th className="p-3 text-gray-300 font-medium">Certificate ID</th>
+                    <th className="p-3 text-gray-300 font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {registrations.map((registration) => (
                     <tr key={registration.id} className="border-b border-gray-700 hover:bg-gray-800/30">
                       <td className="p-3 text-white font-medium">{registration.name}</td>
+                      <td className="p-3 text-gray-300">{registration.yearOfBirth || '—'}</td>
                       <td className="p-3 text-gray-300 font-mono">{registration.phone}</td>
                       <td className="p-3 text-gray-300 max-w-xs">
                         {registration.description ? (
@@ -407,11 +432,11 @@ export default function Admin() {
                       </td>
                       <td className="p-3">
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          registration.agreedTos 
+                          registration.certificateConfirmed 
                             ? 'bg-green-900 text-green-200' 
-                            : 'bg-red-900 text-red-200'
+                            : 'bg-yellow-900 text-yellow-200'
                         }`}>
-                          {registration.agreedTos ? 'Yes' : 'No'}
+                          {registration.certificateConfirmed ? 'Confirmed' : 'Pending'}
                         </span>
                       </td>
                       <td className="p-3 text-gray-300">
@@ -442,12 +467,23 @@ export default function Admin() {
                       </td>
                       <td className="p-3 text-gray-400 font-mono text-xs">
                         <button 
-                          onClick={() => navigator.clipboard.writeText(registration.id)}
+                          onClick={() => navigator.clipboard.writeText(registration.certificateId)}
                           className="truncate max-w-24 hover:bg-gray-700 px-1 py-1 rounded transition-colors"
-                          title={`Click to copy: ${registration.id}`}
+                          title={`Click to copy: ${registration.certificateId}`}
                         >
-                          {registration.id.slice(0, 8)}...
+                          {registration.certificateId}
                         </button>
+                      </td>
+                      <td className="p-3">
+                        {!registration.certificateConfirmed && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleConfirmCertificate(registration.id)}
+                            className="bg-green-700 hover:bg-green-600 text-white text-xs px-2 py-1"
+                          >
+                            Confirm Certificate
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   ))}
