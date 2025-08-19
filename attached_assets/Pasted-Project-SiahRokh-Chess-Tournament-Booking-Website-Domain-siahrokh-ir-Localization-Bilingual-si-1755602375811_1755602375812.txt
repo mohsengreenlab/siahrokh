@@ -1,0 +1,87 @@
+Project: SiahRokh — Chess Tournament Booking Website
+Domain: siahrokh.ir
+
+Localization:
+Bilingual site: Persian (default, RTL) and English
+
+Global language switcher in the header (persists across pages)
+
+-Admin Dashboard (English):
+Hidden page, and accessible only via url /admin24
+Create & manage tournaments:
+Name, Date, Time
+Open for registration (checkbox)
+Venue details (exact address + extra info text shown post-registration)
+Manage registrations (view list, search/filter)
+View registered participants and uploaded fee receipt photos
+Set “Next tournament” to power the homepage countdown
+Note: Admin panel language is English
+
+User Flow:
+Tournament Selection:
+Users pick a tournament name from a dropdown (shows only tournaments marked “Open for registration”)
+Registration Form (appears after selecting a day)
+Mandatory fields: Full name, Phone number, Upload fee receipt photo, Checkbox “I have read the Terms of Service and agree”
+Optional field: Description/Notes
+
+Post-Registration Info + PDF downlaod
+
+After successful registration, show the exact venue address and extra info (entered by admin for that tournament)
+
+Provide a “Download as PDF” button that generates a PDF of these details for the use
+
+
+Countdown:
+Homepage shows a countdown to the next tournament (driven by admin’s selected tournament)
+
+Static Documents (FAQ & Terms):
+
+FAQ and Terms of Service are static PDF files in the codebase (one PDF per language)
+
+Create pages that embed the PDF for viewing and provide a download link
+
+Do not load FAQ/ToS from the database
+
+Data & Storage:
+
+PostgreSQL for all dynamic data:
+
+Tournaments: id, name, date, time, is_open (bool), venue_address, venue_info, created_at, updated_at
+
+Registrations: id, tournament_id (FK), name, phone, receipt_file_path, agreed_tos (bool), description, created_at
+
+File uploads: store receipt images securely (disk or object storage), save the path in DB
+
+Generate PDF (post-registration info) server-side and offer download
+
+🔐 Security & UX
+
+CSRF protection, basic rate-limiting on forms
+
+Validate file type/size for uploads (maximun 10 Megabytes)
+
+Mobile-first, accessible UI; Persian is RTL
+
+Show clear success/error states; support bilingual validation messages
+
+🧩 Tech Hints (optional but helpful)
+
+Server framework of your choice (Node/Express, Python/FastAPI, etc.)
+
+Templating or SPA with SSR acceptable; ensure bilingual routing/strings
+
+Use a lightweight i18n strategy (JSON resource files per language)
+
+PDF generation library (e.g., wkhtmltopdf/WeasyPrint/Puppeteer-based)
+
+Acceptance Criteria
+
+Users can select a tournament, register (with required fields + receipt upload), and upon success see venue details and download them as PDF (localized).
+
+Admin can create tournaments (name/date/time), set Open for registration, and input venue address/info.
+
+Homepage shows a countdown to the next tournament selected in the admin dashboard.
+
+FAQ and Terms are viewable/ downloadable PDFs in both languages and are not database-backed.
+
+All data (except static PDFs) is persisted in PostgreSQL.
