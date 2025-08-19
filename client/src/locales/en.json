@@ -43,6 +43,7 @@
     "venue": "Venue Address",
     "registrationId": "Registration ID",
     "downloadPDF": "Download Details (PDF)",
+    "downloadingPDF": "Downloading PDF...",
     "backToHome": "Back to Home"
   },
   "admin": {

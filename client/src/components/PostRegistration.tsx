@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tournament, Registration } from '@shared/schema';
 import { Button } from '@/components/ui/button';
@@ -10,8 +11,10 @@ interface PostRegistrationProps {
 
 export function PostRegistration({ registration, tournament, onBackToHome }: PostRegistrationProps) {
   const { t } = useTranslation();
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownloadPDF = async () => {
+    setIsDownloading(true);
     if (!tournament) {
       console.error('Tournament details missing');
       return;
@@ -50,6 +53,8 @@ export function PostRegistration({ registration, tournament, onBackToHome }: Pos
     } catch (error) {
       console.error('PDF download failed:', error);
       console.error("Couldn't generate PDF. Please try again.");
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -108,13 +113,22 @@ export function PostRegistration({ registration, tournament, onBackToHome }: Pos
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
               onClick={handleDownloadPDF}
-              disabled={!tournament}
+              disabled={!tournament || isDownloading}
               className="flex-1 bg-white hover:bg-gray-200 text-black font-semibold py-3 px-6 rounded-lg disabled:opacity-50"
               data-testid="button-download-pdf"
               title={!tournament ? "Tournament details are missing" : ""}
             >
-              <i className="fas fa-download mx-2"></i>
-              {t('postRegistration.downloadPDF')}
+              {isDownloading ? (
+                <>
+                  <i className="fas fa-spinner fa-spin mx-2"></i>
+                  {t('postRegistration.downloadingPDF')}
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-download mx-2"></i>
+                  {t('postRegistration.downloadPDF')}
+                </>
+              )}
             </Button>
             <Button
               onClick={onBackToHome}

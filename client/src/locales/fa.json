@@ -43,6 +43,7 @@
     "venue": "آدرس محل برگزاری",
     "registrationId": "شماره ثبت‌نام",
     "downloadPDF": "دانلود جزئیات (PDF)",
+    "downloadingPDF": "در حال دانلود PDF...",
     "backToHome": "بازگشت به خانه"
   },
   "admin": {

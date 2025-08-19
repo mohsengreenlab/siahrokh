@@ -259,12 +259,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
         <head>
           <meta charset="UTF-8">
           <style>
-            body { font-family: Arial, sans-serif; direction: rtl; text-align: right; margin: 40px; }
-            .header { text-align: center; margin-bottom: 40px; }
-            .info-section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; }
-            .info-row { margin-bottom: 10px; }
-            .label { font-weight: bold; display: inline-block; width: 150px; }
-            .value { color: #333; }
+            @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap');
+            
+            * { box-sizing: border-box; }
+            
+            body { 
+              font-family: 'Vazirmatn', 'Tahoma', 'Arial', sans-serif; 
+              direction: rtl; 
+              text-align: right; 
+              margin: 40px; 
+              line-height: 1.6;
+              font-size: 14px;
+              color: #000;
+              background: #fff;
+            }
+            
+            .header { 
+              text-align: center; 
+              margin-bottom: 40px; 
+              border-bottom: 2px solid #000;
+              padding-bottom: 20px;
+            }
+            
+            .header h1 {
+              font-size: 24px;
+              font-weight: 700;
+              margin: 0 0 10px 0;
+              color: #000;
+            }
+            
+            .header p {
+              margin: 5px 0;
+              font-size: 16px;
+              color: #333;
+            }
+            
+            .info-section { 
+              margin-bottom: 30px; 
+              padding: 20px; 
+              border: 2px solid #000; 
+              border-radius: 8px;
+              background: #f9f9f9;
+            }
+            
+            .info-section h2 {
+              font-size: 18px;
+              font-weight: 600;
+              margin: 0 0 15px 0;
+              color: #000;
+              border-bottom: 1px solid #ccc;
+              padding-bottom: 5px;
+            }
+            
+            .info-row { 
+              margin-bottom: 12px; 
+              display: flex;
+              align-items: center;
+            }
+            
+            .label { 
+              font-weight: 600; 
+              display: inline-block; 
+              width: 150px; 
+              color: #000;
+            }
+            
+            .value { 
+              color: #333; 
+              flex: 1;
+              font-size: 14px;
+            }
           </style>
         </head>
         <body>
@@ -304,6 +368,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               <span class="label">شماره ثبت‌نام:</span>
               <span class="value">#${registration.id.substring(0, 8).toUpperCase()}</span>
             </div>
+            ${registration.description ? `
+            <div class="info-row">
+              <span class="label">توضیحات:</span>
+              <span class="value">${registration.description}</span>
+            </div>
+            ` : ''}
           </div>
 
           <div class="info-section">
@@ -318,6 +388,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
               <span class="value">${tournament.venueInfo}</span>
             </div>
             ` : ''}
+          </div>
+          
+          <div class="info-section">
+            <h2>تایید ثبت‌نام</h2>
+            <div class="info-row">
+              <span class="label">وضعیت:</span>
+              <span class="value">ثبت‌نام با موفقیت انجام شده</span>
+            </div>
+            <div class="info-row">
+              <span class="label">تاریخ ثبت‌نام:</span>
+              <span class="value">${new Date(registration.createdAt).toLocaleDateString('fa-IR')}</span>
+            </div>
           </div>
         </body>
         </html>
@@ -362,10 +444,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const page = await browser.newPage();
       await page.setContent(html, { waitUntil: 'networkidle0' });
       
+      // Wait for fonts to load
+      await page.evaluateHandle('document.fonts.ready');
+      
       const pdf = await page.pdf({
         format: 'A4',
         margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' },
-        printBackground: true
+        printBackground: true,
+        preferCSSPageSize: true
       });
 
       await browser.close();
