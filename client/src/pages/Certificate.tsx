@@ -11,6 +11,7 @@ import { CheckCircle, XCircle, Search, AlertTriangle } from 'lucide-react';
 interface CertificateValidationResult {
   valid: boolean;
   certificateId: string;
+  confirmed: boolean;
   participant: {
     name: string;
     email: string;
@@ -147,25 +148,40 @@ export function Certificate() {
             )}
 
             {data && (
-              <Card className="bg-green-900/20 border-green-600">
+              <Card className={data.confirmed ? "bg-green-900/20 border-green-600" : "bg-yellow-900/20 border-yellow-600"}>
                 <CardHeader>
-                  <CardTitle className="text-green-400 flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5" />
-                    {t('certificate.valid')}
+                  <CardTitle className={`flex items-center gap-2 ${data.confirmed ? 'text-green-400' : 'text-yellow-400'}`}>
+                    {data.confirmed ? (
+                      <>
+                        <CheckCircle className="h-5 w-5" />
+                        {t('certificate.confirmed')}
+                      </>
+                    ) : (
+                      <>
+                        <AlertTriangle className="h-5 w-5" />
+                        {t('certificate.pending')}
+                      </>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid gap-6">
                     {/* Certificate Info */}
                     <div className="bg-gray-800 rounded-lg p-4">
-                      <h3 className="font-semibold text-green-400 mb-3">
+                      <h3 className={`font-semibold mb-3 ${data.confirmed ? 'text-green-400' : 'text-yellow-400'}`}>
                         {t('certificate.certificateInfo')}
                       </h3>
                       <div className="space-y-2">
                         <div className={`flex ${isRTL ? 'justify-between' : 'justify-between'} items-center`}>
                           <span className="text-gray-300">{t('certificate.certificateId')}:</span>
-                          <Badge variant="outline" className="bg-green-900/30 text-green-300 border-green-600 font-mono">
+                          <Badge variant="outline" className={`font-mono ${data.confirmed ? 'bg-green-900/30 text-green-300 border-green-600' : 'bg-yellow-900/30 text-yellow-300 border-yellow-600'}`}>
                             {data.certificateId}
+                          </Badge>
+                        </div>
+                        <div className={`flex ${isRTL ? 'justify-between' : 'justify-between'} items-center`}>
+                          <span className="text-gray-300">{t('certificate.status')}:</span>
+                          <Badge variant="outline" className={data.confirmed ? 'bg-green-900/30 text-green-300 border-green-600' : 'bg-yellow-900/30 text-yellow-300 border-yellow-600'}>
+                            {data.confirmed ? t('certificate.confirmed') : t('certificate.pending')}
                           </Badge>
                         </div>
                       </div>

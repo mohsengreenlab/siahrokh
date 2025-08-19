@@ -450,6 +450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         valid: true,
         certificateId: registration.certificateId,
+        confirmed: registration.certificateConfirmed,
         participant: {
           name: registration.name,
           email: registration.email,
