@@ -70,9 +70,8 @@ export default function Home() {
         <div className="absolute inset-0 chess-pattern opacity-5"></div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="mb-8">
-            <h1 className="text-4xl sm:text-6xl font-bold mb-6">
-              <span className="text-white">{t('hero.title')}</span>
-              <span className="text-chess-accent"> شطرنج</span>
+            <h1 className="text-4xl sm:text-6xl font-bold mb-6 text-white">
+              {t('hero.title')}
             </h1>
             <p className="text-xl text-gray-300 mb-12">
               {t('hero.subtitle')}
