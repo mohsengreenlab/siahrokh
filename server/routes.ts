@@ -11,9 +11,14 @@ import rateLimit from "express-rate-limit";
 import { v4 as uuidv4 } from "uuid";
 
 // Rate limiting
-const limiter = rateLimit({
+const publicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100 // limit each IP to 100 requests per windowMs
+});
+
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000 // More generous limit for admin routes
 });
 
 // File upload configuration
@@ -51,7 +56,14 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  app.use(limiter);
+  // Apply public rate limiter to non-admin routes
+  app.use('/api/', (req, res, next) => {
+    if (req.path.startsWith('/admin')) {
+      adminLimiter(req, res, next);
+    } else {
+      publicLimiter(req, res, next);
+    }
+  });
 
   // Get all open tournaments
   app.get("/api/tournaments", async (req, res) => {
