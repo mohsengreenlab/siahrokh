@@ -184,12 +184,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!req.body.yearOfBirth) {
         errors.push("Year of birth is required");
-      } else {
-        const year = parseInt(req.body.yearOfBirth);
-        const currentYear = new Date().getFullYear();
-        if (isNaN(year) || year < 1900 || year > currentYear) {
-          errors.push("Please enter a valid year between 1900 and current year");
-        }
+      } else if (!/^\d{4}$/.test(req.body.yearOfBirth)) {
+        errors.push("Year of birth must be a 4-digit number");
       }
       
       if (!req.file) {

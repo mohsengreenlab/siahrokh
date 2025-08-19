@@ -27,12 +27,7 @@ const createFormSchema = (t: (key: string) => string) => z.object({
     .email(t('errors.invalidEmail')),
   yearOfBirth: z.string()
     .min(1, t('errors.required'))
-    .regex(/^\d{4}$/, t('errors.invalidYear'))
-    .refine((year) => {
-      const currentYear = new Date().getFullYear();
-      const birthYear = parseInt(year);
-      return birthYear >= 1900 && birthYear <= currentYear;
-    }, t('errors.yearOutOfRange')),
+    .regex(/^\d{4}$/, t('errors.invalidYear')),
   receiptFile: z.instanceof(File, { message: t('errors.fileRequired') })
     .refine((file) => file.size <= 10 * 1024 * 1024, t('errors.fileTooLarge'))
     .refine(
@@ -340,10 +335,9 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                     <FormControl>
                       <Input
                         {...field}
-                        type="number"
-                        min="1900"
-                        max={new Date().getFullYear()}
+                        type="text"
                         placeholder="1990"
+                        maxLength={4}
                         data-testid="input-year-of-birth"
                         className={`bg-chess-dark border-gray-600 text-white placeholder-gray-400 focus:border-gray-400 ${
                           form.formState.errors.yearOfBirth ? 'border-red-500 focus:border-red-400' : ''
