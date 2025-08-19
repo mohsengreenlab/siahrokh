@@ -397,13 +397,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/tournaments", requireAuth, async (req, res) => {
     try {
-      const tournamentData = insertTournamentSchema.parse(req.body);
-      const tournament = await storage.createTournament({
-        ...tournamentData,
-        date: new Date(tournamentData.date + 'T' + tournamentData.time)
-      });
+      const { name, date, time, isOpen, venueAddress, venueInfo } = req.body;
+      
+      // Validate required fields
+      if (!name || !date || !time || !venueAddress) {
+        return res.status(400).json({ error: "Missing required fields: name, date, time, venueAddress" });
+      }
+      
+      // Create proper Date object from date and time strings
+      const combinedDateTime = new Date(`${date}T${time}`);
+      
+      // Check if date is valid
+      if (isNaN(combinedDateTime.getTime())) {
+        return res.status(400).json({ error: "Invalid date or time format" });
+      }
+      
+      const tournamentData = {
+        name: name.trim(),
+        date: combinedDateTime,
+        time: time,
+        isOpen: Boolean(isOpen),
+        venueAddress: venueAddress.trim(),
+        venueInfo: venueInfo?.trim() || null
+      };
+      
+      const tournament = await storage.createTournament(tournamentData);
       res.json(tournament);
     } catch (error) {
+      console.error('Tournament creation error:', error);
       res.status(400).json({ error: error instanceof Error ? error.message : "Failed to create tournament" });
     }
   });
