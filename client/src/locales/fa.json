@@ -35,7 +35,8 @@
     "fileSize": "حداکثر اندازه فایل: ۱۰ مگابایت",
     "required": "*",
     "success": "ثبت‌نام با موفقیت انجام شد!",
-    "successSubtitle": "جزئیات تورنمنت برای شما ارسال شد"
+    "successSubtitle": "جزئیات تورنمنت برای شما ارسال شد",
+    "uploadSuccess": "فایل با موفقیت آپلود شد"
   },
   "postRegistration": {
     "details": "جزئیات تورنمنت",

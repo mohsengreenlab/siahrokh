@@ -135,6 +135,12 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
     }
     setUploadedFile(file);
     form.setValue('receiptFile', file);
+    
+    // Show success message
+    toast({
+      title: t('registration.uploadSuccess'),
+      description: `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
+    });
   };
 
   const handleDragOver = (e: React.DragEvent) => {

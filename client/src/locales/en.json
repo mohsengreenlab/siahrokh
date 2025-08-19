@@ -35,7 +35,8 @@
     "fileSize": "Maximum file size: 10MB",
     "required": "*",
     "success": "Registration completed successfully!",
-    "successSubtitle": "Tournament details have been sent to you"
+    "successSubtitle": "Tournament details have been sent to you",
+    "uploadSuccess": "File uploaded successfully"
   },
   "postRegistration": {
     "details": "Tournament Details",

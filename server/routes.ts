@@ -252,43 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Tournament not found" });
       }
 
-      // Try Puppeteer with timeout, fallback to HTML response
-      let browser;
-      try {
-        browser = await Promise.race([
-          puppeteer.launch({ 
-            headless: true,
-            executablePath: '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
-            args: [
-              '--no-sandbox',
-              '--disable-setuid-sandbox',
-              '--disable-dev-shm-usage',
-              '--disable-accelerated-2d-canvas',
-              '--no-first-run',
-              '--no-zygote',
-              '--disable-gpu',
-              '--disable-extensions',
-              '--disable-background-timer-throttling',
-              '--disable-backgrounding-occluded-windows',
-              '--disable-renderer-backgrounding',
-              '--disable-features=TranslateUI',
-              '--disable-ipc-flooding-protection'
-            ]
-          }),
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Browser launch timeout')), 10000)
-          )
-        ]);
-      } catch (browserError) {
-        console.error('Browser launch failed, sending HTML instead:', browserError.message);
-        
-        // Send HTML content directly for user to save/print as PDF
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Content-Disposition', `inline; filename="tournament-${registration.id}.html"`);
-        return res.send(html);
-      }
-      const page = await browser.newPage();
-
+      // Create HTML template first
       const html = `
         <!DOCTYPE html>
         <html dir="rtl" lang="fa">
@@ -359,16 +323,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         </html>
       `;
 
-      await page.setContent(html);
+      // Try Puppeteer with timeout, fallback to HTML response
+      let browser;
+      try {
+        browser = await Promise.race([
+          puppeteer.launch({ 
+            headless: true,
+            executablePath: '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
+            args: [
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-accelerated-2d-canvas',
+              '--no-first-run',
+              '--no-zygote',
+              '--disable-gpu',
+              '--disable-extensions',
+              '--disable-background-timer-throttling',
+              '--disable-backgrounding-occluded-windows',
+              '--disable-renderer-backgrounding',
+              '--disable-features=TranslateUI',
+              '--disable-ipc-flooding-protection'
+            ]
+          }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Browser launch timeout')), 10000)
+          )
+        ]);
+      } catch (browserError) {
+        console.error('Browser launch failed, sending HTML instead:', browserError.message);
+        
+        // Send HTML content directly for user to save/print as PDF
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Content-Disposition', `inline; filename="tournament-${registration.id}.html"`);
+        return res.send(html);
+      }
+
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+      
       const pdf = await page.pdf({
         format: 'A4',
-        printBackground: true,
-        margin: {
-          top: '20px',
-          bottom: '20px',
-          left: '20px',
-          right: '20px'
-        }
+        margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' },
+        printBackground: true
       });
 
       await browser.close();
@@ -400,43 +397,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/tournaments", requireAuth, async (req, res) => {
     try {
-      let tournamentData = req.body;
-      
-      // Convert date+time from frontend format to proper Date object
-      if (typeof tournamentData.date === 'string' && tournamentData.date.includes('T')) {
-        // Date is already combined with time (ISO format from frontend)
-        const dateObj = new Date(tournamentData.date);
-        tournamentData = {
-          ...tournamentData,
-          date: dateObj,
-          time: dateObj.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
-        };
-      } else if (typeof tournamentData.date === 'string' && tournamentData.time) {
-        // Separate date and time fields
-        const combinedDateTime = new Date(tournamentData.date + 'T' + tournamentData.time);
-        tournamentData = {
-          ...tournamentData,
-          date: combinedDateTime
-        };
-      }
-      
-      // Log for debugging
-      console.log('Processing tournament data:', tournamentData);
-      
-      // Skip Zod validation and create tournament directly with proper typing
-      const tournamentToCreate = {
-        name: tournamentData.name,
-        date: tournamentData.date instanceof Date ? tournamentData.date : new Date(tournamentData.date),
-        time: tournamentData.time,
-        isOpen: Boolean(tournamentData.isOpen),
-        venueAddress: tournamentData.venueAddress,
-        venueInfo: tournamentData.venueInfo || null
-      } as InsertTournament;
-      
-      const tournament = await storage.createTournament(tournamentToCreate);
+      const tournamentData = insertTournamentSchema.parse(req.body);
+      const tournament = await storage.createTournament({
+        ...tournamentData,
+        date: new Date(tournamentData.date + 'T' + tournamentData.time)
+      });
       res.json(tournament);
     } catch (error) {
-      console.error('Tournament creation error:', error);
       res.status(400).json({ error: error instanceof Error ? error.message : "Failed to create tournament" });
     }
   });
@@ -489,21 +456,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/next-tournament", requireAuth, async (req, res) => {
     try {
-      const { tournamentId } = req.body;
-      await storage.setNextTournament(tournamentId);
+      await storage.setNextTournament(req.body.tournamentId);
       res.json({ success: true });
     } catch (error) {
-      res.status(400).json({ error: "Failed to set next tournament" });
+      res.status(400).json({ error: error instanceof Error ? error.message : "Failed to set next tournament" });
     }
   });
 
   app.get("/api/admin/registrations", requireAuth, async (req, res) => {
     try {
-      const { tournamentId, search } = req.query;
-      const registrations = await storage.getRegistrations(tournamentId as string, search as string);
+      const tournamentId = req.query.tournamentId as string;
+      if (!tournamentId) {
+        return res.json([]);
+      }
+      const registrations = await storage.getRegistrations(tournamentId);
       res.json(registrations);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch registrations" });
+      res.status(400).json({ error: error instanceof Error ? error.message : "Failed to fetch registrations" });
     }
   });
 
