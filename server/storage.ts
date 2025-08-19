@@ -18,6 +18,7 @@ export interface IStorage {
   getTournament(id: string): Promise<Tournament | undefined>;
   createTournament(insertTournament: InsertTournament): Promise<Tournament>;
   updateTournament(id: string, insertTournament: InsertTournament): Promise<Tournament>;
+  deleteTournament(id: string): Promise<void>;
   getNextTournament(): Promise<Tournament | undefined>;
   setNextTournament(tournamentId: string): Promise<void>;
   
@@ -79,6 +80,23 @@ export class DatabaseStorage implements IStorage {
       .where(eq(tournaments.id, id))
       .returning();
     return tournament;
+  }
+
+  async deleteTournament(id: string): Promise<void> {
+    // First delete all registrations for this tournament
+    await db.delete(registrations).where(eq(registrations.tournamentId, id));
+    
+    // Then delete the tournament
+    await db.delete(tournaments).where(eq(tournaments.id, id));
+    
+    // Clear next tournament setting if this was the selected one
+    const [settings] = await db.select().from(appSettings).limit(1);
+    if (settings?.nextTournamentId === id) {
+      await db
+        .update(appSettings)
+        .set({ nextTournamentId: null, updatedAt: new Date() })
+        .where(eq(appSettings.id, settings.id));
+    }
   }
 
   async getNextTournament(): Promise<Tournament | undefined> {

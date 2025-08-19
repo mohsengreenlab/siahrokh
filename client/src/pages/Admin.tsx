@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { LoginForm } from '@/components/LoginForm';
 import { useAuth } from '@/hooks/useAuth';
+import { TournamentEditForm } from '@/components/TournamentEditForm';
 import { LogOut, Calendar, Filter } from 'lucide-react';
 
 const tournamentSchema = z.object({
@@ -102,6 +103,8 @@ export default function Admin() {
       toast({ title: 'Tournament created successfully' });
       form.reset();
       queryClient.invalidateQueries({ queryKey: ['/api/admin/tournaments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tournaments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tournaments/next'] });
     },
     onError: () => {
       toast({ title: 'Error creating tournament', variant: 'destructive' });
@@ -340,10 +343,12 @@ export default function Admin() {
                     }`}>
                       {tournament.isOpen ? 'Open' : 'Closed'}
                     </span>
+                    <TournamentEditForm tournament={tournament} />
                     <Button
                       size="sm"
                       onClick={() => setNextTournamentMutation.mutate(tournament.id)}
                       className="bg-white hover:bg-gray-200 text-black text-xs"
+                      data-testid={`button-set-next-${tournament.id}`}
                     >
                       Set as Next
                     </Button>
@@ -352,6 +357,7 @@ export default function Admin() {
                       variant="outline"
                       onClick={() => setSelectedTournamentId(tournament.id)}
                       className="border-gray-600 text-gray-300 hover:bg-gray-800 text-xs"
+                      data-testid={`button-view-registrations-${tournament.id}`}
                     >
                       View Registrations
                     </Button>

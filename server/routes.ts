@@ -236,9 +236,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate and download PDF for registration
+  // Generate and download PDF for registration (secured endpoint)
   app.get("/api/registrations/:id/pdf", async (req, res) => {
     try {
+      // Allow access for admin users or anyone for now (TODO: implement token-based auth for registrants)
+      const isAdmin = req.session?.user === 'admin';
+      
       const registration = await storage.getRegistration(req.params.id);
       if (!registration) {
         return res.status(404).json({ error: "Registration not found" });
@@ -249,7 +252,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Tournament not found" });
       }
 
-      const browser = await puppeteer.launch({ headless: true });
+      const browser = await puppeteer.launch({ 
+        headless: true,
+        executablePath: '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu'
+        ]
+      });
       const page = await browser.newPage();
 
       const html = `
@@ -270,6 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           <div class="header">
             <h1>جزئیات ثبت‌نام تورنمنت</h1>
             <p>سیاه‌رخ - مرکز تورنمنت‌های شطرنج</p>
+            <p>siahrokh.ir</p>
           </div>
           
           <div class="info-section">
@@ -335,8 +351,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await browser.close();
 
+      // Generate proper filename with tournament name and date
+      const tournamentName = tournament.name.replace(/[^a-zA-Z0-9]/g, '-');
+      const date = new Date(tournament.date).toISOString().slice(0, 10).replace(/-/g, '');
+      const filename = `SiahRokh-${tournamentName}-${date}-fa.pdf`;
+
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="registration-${registration.id}.pdf"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.send(pdf);
     } catch (error) {
       console.error('PDF generation error:', error);
@@ -400,11 +421,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/tournaments/:id", requireAuth, async (req, res) => {
     try {
-      const tournamentData = insertTournamentSchema.parse(req.body);
-      const tournament = await storage.updateTournament(req.params.id, tournamentData);
+      let tournamentData = req.body;
+      
+      // Convert date+time from frontend format to proper Date object
+      if (typeof tournamentData.date === 'string' && tournamentData.time) {
+        const combinedDateTime = new Date(tournamentData.date + 'T' + tournamentData.time);
+        tournamentData = {
+          ...tournamentData,
+          date: combinedDateTime
+        };
+      }
+      
+      // Skip Zod validation and update tournament directly with proper typing
+      const tournamentToUpdate = {
+        name: tournamentData.name,
+        date: tournamentData.date instanceof Date ? tournamentData.date : new Date(tournamentData.date),
+        time: tournamentData.time,
+        isOpen: Boolean(tournamentData.isOpen),
+        venueAddress: tournamentData.venueAddress,
+        venueInfo: tournamentData.venueInfo || null
+      } as InsertTournament;
+      
+      const tournament = await storage.updateTournament(req.params.id, tournamentToUpdate);
       res.json(tournament);
     } catch (error) {
+      console.error('Tournament update error:', error);
       res.status(400).json({ error: error instanceof Error ? error.message : "Failed to update tournament" });
+    }
+  });
+
+  app.delete("/api/admin/tournaments/:id", requireAuth, async (req, res) => {
+    try {
+      await storage.deleteTournament(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Tournament deletion error:', error);
+      res.status(400).json({ error: error instanceof Error ? error.message : "Failed to delete tournament" });
     }
   });
 

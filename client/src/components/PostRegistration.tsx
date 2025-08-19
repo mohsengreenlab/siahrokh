@@ -12,6 +12,11 @@ export function PostRegistration({ registration, tournament, onBackToHome }: Pos
   const { t } = useTranslation();
 
   const handleDownloadPDF = async () => {
+    if (!tournament) {
+      console.error('Tournament details missing');
+      return;
+    }
+    
     try {
       const response = await fetch(`/api/registrations/${registration.id}/pdf`);
       if (response.ok) {
@@ -24,9 +29,13 @@ export function PostRegistration({ registration, tournament, onBackToHome }: Pos
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
+      } else {
+        console.error('Failed to generate PDF:', response.status);
+        console.error("Couldn't generate PDF. Please try again.");
       }
     } catch (error) {
       console.error('PDF download failed:', error);
+      console.error("Couldn't generate PDF. Please try again.");
     }
   };
 
@@ -85,7 +94,10 @@ export function PostRegistration({ registration, tournament, onBackToHome }: Pos
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
               onClick={handleDownloadPDF}
-              className="flex-1 bg-white hover:bg-gray-200 text-black font-semibold py-3 px-6 rounded-lg"
+              disabled={!tournament}
+              className="flex-1 bg-white hover:bg-gray-200 text-black font-semibold py-3 px-6 rounded-lg disabled:opacity-50"
+              data-testid="button-download-pdf"
+              title={!tournament ? "Tournament details are missing" : ""}
             >
               <i className="fas fa-download mx-2"></i>
               {t('postRegistration.downloadPDF')}
