@@ -400,22 +400,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { name, date, time, isOpen, venueAddress, venueInfo } = req.body;
       
       // Validate required fields
-      if (!name || !date || !time || !venueAddress) {
-        return res.status(400).json({ error: "Missing required fields: name, date, time, venueAddress" });
+      if (!name || !date || !venueAddress) {
+        return res.status(400).json({ error: "Missing required fields: name, date, venueAddress" });
       }
       
-      // Create proper Date object from date and time strings
-      const combinedDateTime = new Date(`${date}T${time}`);
+      // Handle different date formats from frontend
+      let tournamentDate: Date;
+      let tournamentTime: string;
+      
+      if (typeof date === 'string' && date.includes('T')) {
+        // ISO string format from frontend
+        tournamentDate = new Date(date);
+        tournamentTime = time || tournamentDate.toTimeString().slice(0, 5); // Extract HH:MM
+      } else {
+        // Separate date and time fields
+        if (!time) {
+          return res.status(400).json({ error: "Time is required when date is not in ISO format" });
+        }
+        tournamentDate = new Date(`${date}T${time}`);
+        tournamentTime = time;
+      }
       
       // Check if date is valid
-      if (isNaN(combinedDateTime.getTime())) {
+      if (isNaN(tournamentDate.getTime())) {
         return res.status(400).json({ error: "Invalid date or time format" });
       }
       
       const tournamentData = {
         name: name.trim(),
-        date: combinedDateTime,
-        time: time,
+        date: tournamentDate,
+        time: tournamentTime,
         isOpen: Boolean(isOpen),
         venueAddress: venueAddress.trim(),
         venueInfo: venueInfo?.trim() || null
@@ -425,6 +439,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(tournament);
     } catch (error) {
       console.error('Tournament creation error:', error);
+      console.error('Request body:', req.body);
       res.status(400).json({ error: error instanceof Error ? error.message : "Failed to create tournament" });
     }
   });

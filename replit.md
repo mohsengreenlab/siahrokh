@@ -28,7 +28,7 @@ Preferred communication style: Simple, everyday language.
 - **Development Tools**: Hot module replacement via Vite integration in development mode
 
 ### Database & Data Storage
-- **Database**: PostgreSQL with Neon serverless driver
+- **Database**: PostgreSQL with standard pg driver (migrated from Neon)
 - **ORM**: Drizzle ORM for type-safe database operations
 - **Schema Management**: Database migrations via Drizzle Kit
 - **Tables**: tournaments, registrations, users, app_settings with proper foreign key relationships
@@ -52,7 +52,7 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### Core Framework Dependencies
-- **@neondatabase/serverless**: Neon PostgreSQL serverless driver for database connectivity
+- **pg**: PostgreSQL client for database connectivity (migrated from Neon)
 - **drizzle-orm**: TypeScript ORM for database operations and schema management
 - **express**: Web application framework for API endpoints and middleware
 - **@tanstack/react-query**: Server state management and data fetching
