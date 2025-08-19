@@ -4,7 +4,7 @@ import {
   type Registration, type InsertRegistration, type AppSettings
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, gte } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -13,7 +13,7 @@ export interface IStorage {
   createUser(insertUser: InsertUser): Promise<User>;
   
   // Tournament methods
-  getAllTournaments(): Promise<Tournament[]>;
+  getAllTournaments(fromDate?: Date): Promise<Tournament[]>;
   getOpenTournaments(): Promise<Tournament[]>;
   getTournament(id: string): Promise<Tournament | undefined>;
   createTournament(insertTournament: InsertTournament): Promise<Tournament>;
@@ -46,7 +46,12 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getAllTournaments(): Promise<Tournament[]> {
+  async getAllTournaments(fromDate?: Date): Promise<Tournament[]> {
+    if (fromDate) {
+      return await db.select().from(tournaments)
+        .where(gte(tournaments.date, fromDate))
+        .orderBy(desc(tournaments.date));
+    }
     return await db.select().from(tournaments).orderBy(desc(tournaments.date));
   }
 

@@ -35,8 +35,9 @@ Preferred communication style: Simple, everyday language.
 - **File Storage**: Local filesystem for uploaded receipt images
 
 ### Authentication & Authorization
-- **Admin Access**: URL-based admin access (/admin24) without traditional authentication
-- **Security**: Input validation, file type restrictions, and rate limiting for basic protection
+- **Admin Access**: Session-based authentication with secure login (admin/fefwer4234FERF#@$$@#)
+- **Session Management**: Express sessions with secure HTTPS-only cookies, CSRF protection
+- **Security**: Input validation, file type restrictions, rate limiting, and comprehensive security headers
 
 ### Key Features & Workflows
 - **Tournament Management**: Admin can create/edit tournaments with venue details and registration status

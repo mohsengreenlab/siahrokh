@@ -1,9 +1,25 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.set('trust proxy', true); // Enable trust proxy for Replit environment
+
+// Session configuration with secure settings
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+    httpOnly: true, // Prevent XSS attacks
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'strict' // CSRF protection
+  },
+  name: 'sessionId' // Don't use default session name
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -11,6 +11,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
+import { LoginForm } from '@/components/LoginForm';
+import { useAuth } from '@/hooks/useAuth';
+import { LogOut, Calendar, Filter } from 'lucide-react';
 
 const tournamentSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -25,7 +28,29 @@ export default function Admin() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isAuthenticated, isLoading, logout } = useAuth();
   const [selectedTournamentId, setSelectedTournamentId] = useState<string>('');
+  const [dateFilter, setDateFilter] = useState<string>('');
+
+  // Update URL with date filter
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (dateFilter) {
+      url.searchParams.set('from', dateFilter);
+    } else {
+      url.searchParams.delete('from');
+    }
+    window.history.replaceState({}, '', url.toString());
+  }, [dateFilter]);
+
+  // Load date filter from URL on mount
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const fromParam = url.searchParams.get('from');
+    if (fromParam) {
+      setDateFilter(fromParam);
+    }
+  }, []);
 
   const form = useForm<z.infer<typeof tournamentSchema>>({
     resolver: zodResolver(tournamentSchema),
@@ -40,7 +65,14 @@ export default function Admin() {
   });
 
   const { data: tournaments = [] } = useQuery<Tournament[]>({
-    queryKey: ['/api/admin/tournaments']
+    queryKey: ['/api/admin/tournaments', dateFilter],
+    queryFn: async () => {
+      const url = `/api/admin/tournaments${dateFilter ? `?from=${dateFilter}` : ''}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch tournaments');
+      return response.json();
+    },
+    enabled: isAuthenticated
   });
 
   const { data: registrations = [] } = useQuery<Registration[]>({
@@ -99,12 +131,69 @@ export default function Admin() {
     createTournamentMutation.mutate(data);
   };
 
+  const handleLogout = () => {
+    logout();
+    toast({ title: 'Logged out successfully' });
+  };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+      </div>
+    );
+  }
+
+  // Show login form if not authenticated
+  if (!isAuthenticated) {
+    return <LoginForm onLoginSuccess={() => window.location.reload()} />;
+  }
+
   return (
     <div className="min-h-screen bg-chess-black p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-white">{t('admin.dashboard')}</h1>
-          <div className="text-sm text-gray-400">English Interface</div>
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-gray-400">English Interface</div>
+            <Button 
+              onClick={handleLogout} 
+              variant="outline" 
+              size="sm"
+              className="bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
+              data-testid="button-logout"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
+        </div>
+
+        {/* Date Filter */}
+        <div className="bg-chess-card rounded-xl p-4 mb-8 border border-gray-700">
+          <div className="flex items-center gap-4">
+            <Filter className="h-5 w-5 text-gray-400" />
+            <label className="text-gray-300 font-medium">Show tournaments on/after:</label>
+            <Input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="bg-chess-dark border-gray-600 text-white w-auto"
+              data-testid="input-date-filter"
+            />
+            {dateFilter && (
+              <Button 
+                onClick={() => setDateFilter('')}
+                variant="outline" 
+                size="sm"
+                className="bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
+                data-testid="button-clear-filter"
+              >
+                Clear Filter
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2">

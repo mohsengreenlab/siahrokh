@@ -10,30 +10,74 @@ import puppeteer from "puppeteer";
 import rateLimit from "express-rate-limit";
 import { v4 as uuidv4 } from "uuid";
 
+// Session interface
+declare module "express-session" {
+  interface SessionData {
+    isAuthenticated?: boolean;
+    userId?: string;
+  }
+}
+
 // Rate limiting
 const publicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    // Skip rate limiting in development
+    return process.env.NODE_ENV === 'development';
+  }
 });
 
 const adminLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000 // More generous limit for admin routes
+  max: 1000, // More generous limit for admin routes
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    // Skip rate limiting in development
+    return process.env.NODE_ENV === 'development';
+  }
 });
 
-// File upload configuration
-const uploadDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Authentication middleware
+const requireAuth = (req: any, res: any, next: any) => {
+  if (!req.session?.isAuthenticated) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+  next();
+};
+
+// File upload configuration with improved naming
+const uploadDir = path.join(process.cwd(), 'uploads', 'receipts');
+
+const createUploadDirectoryStructure = (date: Date) => {
+  const year = date.getFullYear().toString();
+  const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+  const dayDir = path.join(uploadDir, year, dateStr);
+  
+  if (!fs.existsSync(dayDir)) {
+    fs.mkdirSync(dayDir, { recursive: true });
+  }
+  
+  return dayDir;
+};
 
 const storage_multer = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir);
+    const now = new Date();
+    const dayDir = createUploadDirectoryStructure(now);
+    cb(null, dayDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD format
+    const registrationId = uuidv4().substring(0, 8); // Short UUID
+    const random8 = Math.random().toString(36).substring(2, 10); // 8 random chars
+    const ext = path.extname(file.originalname);
+    const filename = `${dateStr}-${registrationId}-${random8}${ext}`;
+    cb(null, filename);
   }
 });
 
@@ -59,11 +103,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Apply rate limiter only to public API routes (exclude admin routes)
   app.use('/api', (req, res, next) => {
     if (req.path.startsWith('/admin')) {
-      // Skip rate limiting for admin routes
-      next();
+      adminLimiter(req, res, next);
     } else {
       publicLimiter(req, res, next);
     }
+  });
+
+  // Authentication routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Check credentials (hardcoded as requested)
+      if (username === 'admin' && password === 'fefwer4234FERF#@$$@#') {
+        req.session.isAuthenticated = true;
+        req.session.userId = username;
+        res.json({ success: true, message: "Login successful" });
+      } else {
+        res.status(401).json({ error: "Invalid credentials" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ error: "Logout failed" });
+      }
+      res.clearCookie('sessionId');
+      res.json({ success: true, message: "Logout successful" });
+    });
+  });
+
+  app.get("/api/auth/check", (req, res) => {
+    res.json({ 
+      isAuthenticated: !!req.session?.isAuthenticated,
+      user: req.session?.userId || null 
+    });
   });
 
   // Get all open tournaments
@@ -266,17 +344,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin routes (only accessible via /admin24)
-  app.get("/api/admin/tournaments", async (req, res) => {
+  // Admin routes - protected with authentication
+  app.get("/api/admin/tournaments", requireAuth, async (req, res) => {
     try {
-      const tournaments = await storage.getAllTournaments();
+      const { from } = req.query;
+      const tournaments = await storage.getAllTournaments(from ? new Date(from as string) : undefined);
       res.json(tournaments);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch tournaments" });
     }
   });
 
-  app.post("/api/admin/tournaments", async (req, res) => {
+  app.post("/api/admin/tournaments", requireAuth, async (req, res) => {
     try {
       let tournamentData = req.body;
       
@@ -319,7 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/tournaments/:id", async (req, res) => {
+  app.put("/api/admin/tournaments/:id", requireAuth, async (req, res) => {
     try {
       const tournamentData = insertTournamentSchema.parse(req.body);
       const tournament = await storage.updateTournament(req.params.id, tournamentData);
@@ -329,7 +408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/next-tournament", async (req, res) => {
+  app.post("/api/admin/next-tournament", requireAuth, async (req, res) => {
     try {
       const { tournamentId } = req.body;
       await storage.setNextTournament(tournamentId);
@@ -339,7 +418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/registrations", async (req, res) => {
+  app.get("/api/admin/registrations", requireAuth, async (req, res) => {
     try {
       const { tournamentId, search } = req.query;
       const registrations = await storage.getRegistrations(tournamentId as string, search as string);
