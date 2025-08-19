@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "home": "خانه",
+    "tournaments": "تورنمنت‌ها",
+    "faq": "سؤالات متداول",
+    "terms": "قوانین"
+  },
+  "hero": {
+    "title": "تورنمنت شطرنج",
+    "subtitle": "در بزرگ‌ترین تورنمنت شطرنج کشور شرکت کنید"
+  },
+  "countdown": {
+    "days": "روز",
+    "hours": "ساعت",
+    "minutes": "دقیقه",
+    "seconds": "ثانیه"
+  },
+  "tournament": {
+    "selection": "انتخاب تورنمنت",
+    "selectionSubtitle": "تورنمنت مورد نظر خود را انتخاب کنید",
+    "select": "انتخاب تورنمنت",
+    "open": "باز",
+    "closed": "بسته",
+    "participants": "شرکت‌کننده"
+  },
+  "registration": {
+    "title": "ثبت‌نام در تورنمنت",
+    "fullName": "نام و نام خانوادگی",
+    "phone": "شماره تلفن",
+    "receipt": "رسید پرداخت هزینه ثبت‌نام",
+    "notes": "توضیحات (اختیاری)",
+    "agreeTerms": "قوانین و مقررات را خوانده‌ام و موافقم",
+    "submit": "ثبت‌نام در تورنمنت",
+    "fileUpload": "فایل را اینجا بکشید یا کلیک کنید",
+    "fileSize": "حداکثر اندازه فایل: ۱۰ مگابایت",
+    "required": "*",
+    "success": "ثبت‌نام با موفقیت انجام شد!",
+    "successSubtitle": "جزئیات تورنمنت برای شما ارسال شد"
+  },
+  "postRegistration": {
+    "details": "جزئیات تورنمنت",
+    "venue": "آدرس محل برگزاری",
+    "registrationId": "شماره ثبت‌نام",
+    "downloadPDF": "دانلود جزئیات (PDF)",
+    "backToHome": "بازگشت به خانه"
+  },
+  "admin": {
+    "dashboard": "پنل مدیریت",
+    "createTournament": "ایجاد تورنمنت",
+    "tournamentList": "لیست تورنمنت‌ها",
+    "registrations": "ثبت‌نام‌ها",
+    "name": "نام",
+    "date": "تاریخ",
+    "time": "زمان",
+    "openForRegistration": "باز برای ثبت‌نام",
+    "venueAddress": "آدرس محل برگزاری",
+    "venueInfo": "اطلاعات اضافی محل",
+    "create": "ایجاد",
+    "edit": "ویرایش",
+    "setAsNext": "انتخاب به عنوان تورنمنت بعدی"
+  },
+  "faq": {
+    "title": "سؤالات متداول",
+    "download": "دانلود PDF"
+  },
+  "terms": {
+    "title": "قوانین و مقررات",
+    "download": "دانلود PDF"
+  },
+  "footer": {
+    "description": "بزرگ‌ترین پلتفرم رزرو تورنمنت شطرنج در ایران",
+    "quickLinks": "دسترسی سریع",
+    "contact": "تماس با ما",
+    "phone": "۰۲۱-۱۲۳۴۵۶۷۸",
+    "email": "info@siahrokh.ir",
+    "copyright": "© ۱۴۰۳ سیاه‌رخ. تمامی حقوق محفوظ است."
+  },
+  "errors": {
+    "required": "این فیلد الزامی است",
+    "invalidPhone": "شماره تلفن نامعتبر است",
+    "fileRequired": "آپلود فایل الزامی است",
+    "fileTooLarge": "حجم فایل بیش از حد مجاز است",
+    "invalidFileType": "نوع فایل نامعتبر است"
+  }
+}

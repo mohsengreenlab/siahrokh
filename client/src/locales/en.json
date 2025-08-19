@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "home": "Home",
+    "tournaments": "Tournaments",
+    "faq": "FAQ",
+    "terms": "Terms"
+  },
+  "hero": {
+    "title": "Chess Tournament",
+    "subtitle": "Join the biggest chess tournaments in the country"
+  },
+  "countdown": {
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Seconds"
+  },
+  "tournament": {
+    "selection": "Tournament Selection",
+    "selectionSubtitle": "Choose your preferred tournament",
+    "select": "Select Tournament",
+    "open": "Open",
+    "closed": "Closed",
+    "participants": "Participants"
+  },
+  "registration": {
+    "title": "Tournament Registration",
+    "fullName": "Full Name",
+    "phone": "Phone Number",
+    "receipt": "Fee Payment Receipt",
+    "notes": "Notes (Optional)",
+    "agreeTerms": "I have read and agree to the Terms of Service",
+    "submit": "Register for Tournament",
+    "fileUpload": "Drag file here or click to upload",
+    "fileSize": "Maximum file size: 10MB",
+    "required": "*",
+    "success": "Registration completed successfully!",
+    "successSubtitle": "Tournament details have been sent to you"
+  },
+  "postRegistration": {
+    "details": "Tournament Details",
+    "venue": "Venue Address",
+    "registrationId": "Registration ID",
+    "downloadPDF": "Download Details (PDF)",
+    "backToHome": "Back to Home"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard",
+    "createTournament": "Create Tournament",
+    "tournamentList": "Tournament List",
+    "registrations": "Registrations",
+    "name": "Name",
+    "date": "Date",
+    "time": "Time",
+    "openForRegistration": "Open for Registration",
+    "venueAddress": "Venue Address",
+    "venueInfo": "Additional Venue Information",
+    "create": "Create",
+    "edit": "Edit",
+    "setAsNext": "Set as Next Tournament"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "download": "Download PDF"
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "download": "Download PDF"
+  },
+  "footer": {
+    "description": "The largest chess tournament booking platform in Iran",
+    "quickLinks": "Quick Links",
+    "contact": "Contact Us",
+    "phone": "021-12345678",
+    "email": "info@siahrokh.ir",
+    "copyright": "© 2024 SiahRokh. All rights reserved."
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidPhone": "Invalid phone number",
+    "fileRequired": "File upload is required",
+    "fileTooLarge": "File size exceeds limit",
+    "invalidFileType": "Invalid file type"
+  }
+}
