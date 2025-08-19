@@ -6,7 +6,7 @@ import { insertTournamentSchema, insertRegistrationSchema, InsertTournament } fr
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import puppeteer from "puppeteer";
+// Removed puppeteer - using HTML print solution instead
 import rateLimit from "express-rate-limit";
 import { v4 as uuidv4 } from "uuid";
 
@@ -374,64 +374,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         </html>
       `;
 
-      // Try Puppeteer with timeout, fallback to HTML response
-      let browser;
-      try {
-        browser = await Promise.race([
-          puppeteer.launch({ 
-            headless: true,
-            executablePath: '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
-            args: [
-              '--no-sandbox',
-              '--disable-setuid-sandbox',
-              '--disable-dev-shm-usage',
-              '--disable-accelerated-2d-canvas',
-              '--no-first-run',
-              '--no-zygote',
-              '--disable-gpu',
-              '--disable-extensions',
-              '--disable-background-timer-throttling',
-              '--disable-backgrounding-occluded-windows',
-              '--disable-renderer-backgrounding',
-              '--disable-features=TranslateUI',
-              '--disable-ipc-flooding-protection'
-            ]
-          }),
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Browser launch timeout')), 10000)
-          )
-        ]);
-      } catch (browserError) {
-        console.error('Browser launch failed, sending HTML instead:', browserError.message);
-        
-        // Send HTML content directly for user to save/print as PDF
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Content-Disposition', `inline; filename="tournament-${registration.id}.html"`);
-        return res.send(html);
-      }
-
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'domcontentloaded' });
-      
-      // Add a small delay to ensure content is rendered
-      await page.waitForTimeout(1000);
-      
-      const pdf = await page.pdf({
-        format: 'A4',
-        margin: { top: '20mm', right: '15mm', bottom: '20mm', left: '15mm' },
-        printBackground: true
-      });
-
-      await browser.close();
-
       // Generate proper filename with tournament name and date
       const tournamentName = tournament.name.replace(/[^a-zA-Z0-9]/g, '-');
       const date = new Date(tournament.date).toISOString().slice(0, 10).replace(/-/g, '');
-      const filename = `SiahRokh-${tournamentName}-${date}-fa.pdf`;
+      const filename = `SiahRokh-${tournamentName}-${date}.html`;
 
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.send(pdf);
+      // Send HTML content that opens print dialog automatically
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      
+      // Add auto-print script to HTML
+      const printableHtml = html.replace('</body>', `
+        <div style="background: #f9f9f9; padding: 15px; border: 1px solid #ddd; margin-bottom: 20px; border-radius: 5px;" class="no-print">
+          <strong>Instructions:</strong> Use your browser's "Print" function and select "Save as PDF" to download this as a PDF file.
+          <br>Press Ctrl+P (Windows/Linux) or Cmd+P (Mac) to print.
+        </div>
+        <script>
+          // Auto-trigger print dialog after page loads
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 500);
+          };
+        </script>
+        </body>`);
+      
+      res.send(printableHtml);
     } catch (error) {
       console.error('PDF generation error:', error);
       res.status(500).json({ error: "Failed to generate PDF" });
