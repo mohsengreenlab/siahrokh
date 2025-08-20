@@ -10,6 +10,33 @@ import fs from "fs";
 import rateLimit from "express-rate-limit";
 import { v4 as uuidv4 } from "uuid";
 
+/**
+ * Server-side normalization for Persian/Farsi (۰–۹) and Arabic-Indic (٠–٩) numerals to ASCII digits (0–9)
+ * @param input - String containing numerals to normalize
+ * @returns String with normalized ASCII digits
+ */
+function normalizeNumerals(input: string): string {
+  if (!input) return input;
+  
+  // Persian/Farsi numerals (۰–۹) to ASCII (0–9)
+  const persianToAscii: { [key: string]: string } = {
+    '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4',
+    '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9'
+  };
+  
+  // Arabic-Indic numerals (٠–٩) to ASCII (0–9) 
+  const arabicToAscii: { [key: string]: string } = {
+    '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+    '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+  };
+  
+  // Combine both mappings
+  const numeralMap = { ...persianToAscii, ...arabicToAscii };
+  
+  // Replace each character if it exists in the mapping
+  return input.replace(/[۰-۹٠-٩]/g, (char) => numeralMap[char] || char);
+}
+
 // Session interface
 declare module "express-session" {
   interface SessionData {
@@ -169,6 +196,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const errors: string[] = [];
 
+      // Normalize Persian/Arabic numerals in yearOfBirth before validation
+      const normalizedYearOfBirth = req.body.yearOfBirth ? normalizeNumerals(req.body.yearOfBirth.toString()) : '';
+      
       // Manual validation with detailed error messages
       if (!req.body.name || req.body.name.trim().length < 2) {
         errors.push("Full name must be at least 2 characters long");
@@ -182,9 +212,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         errors.push("Valid email address is required");
       }
 
-      if (!req.body.yearOfBirth) {
+      if (!normalizedYearOfBirth) {
         errors.push("Year of birth is required");
-      } else if (!/^\d{4}$/.test(req.body.yearOfBirth)) {
+      } else if (!/^\d{4}$/.test(normalizedYearOfBirth)) {
         errors.push("Year of birth must be a 4-digit number");
       }
       
@@ -220,7 +250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const registrationData = insertRegistrationSchema.parse({
         ...req.body,
-        yearOfBirth: parseInt(req.body.yearOfBirth),
+        yearOfBirth: parseInt(normalizedYearOfBirth),
         receiptFilePath: req.file?.path || '',
         agreedTos: req.body.agreedTos === 'true'
       });

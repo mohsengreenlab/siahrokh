@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Tournament, Registration } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
+import { normalizeNumerals } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -344,6 +345,11 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                         }`}
                         aria-invalid={!!form.formState.errors.yearOfBirth}
                         aria-describedby={form.formState.errors.yearOfBirth ? 'year-error' : undefined}
+                        onChange={(e) => {
+                          // Normalize Persian/Arabic numerals to ASCII digits as user types
+                          const normalizedValue = normalizeNumerals(e.target.value);
+                          field.onChange(normalizedValue);
+                        }}
                       />
                     </FormControl>
                     <FormMessage 
