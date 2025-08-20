@@ -1,0 +1,131 @@
+import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../hooks/useLanguage';
+
+interface SEOProps {
+  title?: string;
+  description?: string;
+  keywords?: string;
+  ogImage?: string;
+  structuredData?: object;
+  canonicalUrl?: string;
+}
+
+export function SEO({ 
+  title, 
+  description, 
+  keywords, 
+  ogImage = '/assets/Gemini_Generated_Image_yguf2iyguf2iyguf_1755644880540.png',
+  structuredData,
+  canonicalUrl 
+}: SEOProps) {
+  const { t } = useTranslation();
+  const { currentLanguage, isRTL } = useLanguage();
+
+  useEffect(() => {
+    // Update document language and direction
+    document.documentElement.setAttribute('lang', currentLanguage);
+    document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
+
+    // Default values based on language
+    const defaultTitles = {
+      fa: 'سیاه‌رخ - تورنمنت شطرنج تهران | رزرو آنلاین مسابقات شطرنج ایران',
+      en: 'SiahRokh - Chess Tournament Tehran | Online Chess Competition Booking Iran'
+    };
+
+    const defaultDescriptions = {
+      fa: 'رزرو آنلاین تورنمنت‌های شطرنج در تهران و ایران. کلاس‌های شطرنج، مسابقات حرفه‌ای و آموزش شطرنج برای همه سطوح در سیاه‌رخ.',
+      en: 'Online booking for chess tournaments in Tehran and Iran. Professional chess classes, competitions and chess training for all levels at SiahRokh.'
+    };
+
+    const defaultKeywords = {
+      fa: 'مسابقه شطرنج تهران, تورنمنت شطرنج ایران, کلاس شطرنج, مسابقات شطرنج, آموزش شطرنج, سیاه رخ, شطرنج حرفه ای',
+      en: 'Chess tournament Tehran, Chess tournament Iran, Chess competition, Chess classes Iran, chess training, SiahRokh, professional chess'
+    };
+
+    // Set title
+    const finalTitle = title || defaultTitles[currentLanguage as keyof typeof defaultTitles];
+    document.title = finalTitle;
+
+    // Update or create meta tags
+    const updateMeta = (name: string, content: string, property?: boolean) => {
+      const selector = property ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+      let meta = document.querySelector(selector) as HTMLMetaElement;
+      if (!meta) {
+        meta = document.createElement('meta');
+        if (property) {
+          meta.setAttribute('property', name);
+        } else {
+          meta.setAttribute('name', name);
+        }
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', content);
+    };
+
+    // Basic meta tags
+    updateMeta('description', description || defaultDescriptions[currentLanguage as keyof typeof defaultDescriptions]);
+    updateMeta('keywords', keywords || defaultKeywords[currentLanguage as keyof typeof defaultKeywords]);
+    updateMeta('author', 'SiahRokh Chess');
+    updateMeta('robots', 'index, follow');
+    updateMeta('language', currentLanguage);
+
+    // Open Graph meta tags
+    updateMeta('og:title', finalTitle, true);
+    updateMeta('og:description', description || defaultDescriptions[currentLanguage as keyof typeof defaultDescriptions], true);
+    updateMeta('og:type', 'website', true);
+    updateMeta('og:image', `${window.location.origin}${ogImage}`, true);
+    updateMeta('og:url', canonicalUrl || window.location.href, true);
+    updateMeta('og:site_name', currentLanguage === 'fa' ? 'سیاه‌رخ' : 'SiahRokh', true);
+    updateMeta('og:locale', currentLanguage === 'fa' ? 'fa_IR' : 'en_US', true);
+
+    // Twitter Card meta tags
+    updateMeta('twitter:card', 'summary_large_image');
+    updateMeta('twitter:title', finalTitle);
+    updateMeta('twitter:description', description || defaultDescriptions[currentLanguage as keyof typeof defaultDescriptions]);
+    updateMeta('twitter:image', `${window.location.origin}${ogImage}`);
+
+    // Canonical URL
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.href = canonicalUrl || window.location.href;
+
+    // Alternate language links
+    let alternateFa = document.querySelector('link[hreflang="fa"]') as HTMLLinkElement;
+    if (!alternateFa) {
+      alternateFa = document.createElement('link');
+      alternateFa.rel = 'alternate';
+      alternateFa.hreflang = 'fa';
+      document.head.appendChild(alternateFa);
+    }
+    alternateFa.href = window.location.href;
+
+    let alternateEn = document.querySelector('link[hreflang="en"]') as HTMLLinkElement;
+    if (!alternateEn) {
+      alternateEn = document.createElement('link');
+      alternateEn.rel = 'alternate';
+      alternateEn.hreflang = 'en';
+      document.head.appendChild(alternateEn);
+    }
+    alternateEn.href = window.location.href;
+
+    // Structured Data
+    if (structuredData) {
+      let structuredDataScript = document.querySelector('#structured-data') as HTMLScriptElement;
+      if (!structuredDataScript) {
+        structuredDataScript = document.createElement('script');
+        structuredDataScript.id = 'structured-data';
+        structuredDataScript.type = 'application/ld+json';
+        document.head.appendChild(structuredDataScript);
+      }
+      structuredDataScript.innerHTML = JSON.stringify(structuredData);
+    }
+
+  }, [title, description, keywords, currentLanguage, isRTL, ogImage, structuredData, canonicalUrl]);
+
+  return null;
+}

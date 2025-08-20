@@ -16,6 +16,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { TournamentEditForm } from '@/components/TournamentEditForm';
 import { TimePicker } from '@/components/ui/time-picker';
 import { LogOut, Calendar, Filter } from 'lucide-react';
+import { SEO } from '../components/SEO';
 
 const tournamentSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -179,9 +180,16 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-chess-black p-8">
+    <>
+      <SEO 
+        title="Admin Dashboard | SiahRokh Chess Tournament Management"
+        description="Admin panel for managing chess tournaments, registrations, and participant data at SiahRokh."
+        keywords="chess admin, tournament management, registration management, chess competition admin"
+        canonicalUrl="https://siahrokh.com/admin24"
+      />
+      <div className="min-h-screen bg-chess-black p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-white">{t('admin.dashboard')}</h1>
           <div className="flex items-center gap-4">
             <div className="text-sm text-gray-400">English Interface</div>
@@ -196,7 +204,7 @@ export default function Admin() {
               Logout
             </Button>
           </div>
-        </div>
+        </header>
 
         {/* Date Filter */}
         <div className="bg-chess-card rounded-xl p-4 mb-8 border border-gray-700">
@@ -520,5 +528,6 @@ export default function Admin() {
         )}
       </div>
     </div>
+    </>
   );
 }

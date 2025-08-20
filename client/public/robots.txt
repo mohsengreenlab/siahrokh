@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Allow: /faq
+Allow: /terms  
+Allow: /certificate
+Disallow: /admin24
+Disallow: /api/
+Disallow: /uploads/
+
+# Sitemap
+Sitemap: https://siahrokh.com/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1

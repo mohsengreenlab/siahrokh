@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../hooks/useLanguage';
 import { Button } from '@/components/ui/button';
+import { SEO } from '../components/SEO';
 
 export default function FAQ() {
   const { t } = useTranslation();
@@ -16,9 +17,25 @@ export default function FAQ() {
   };
 
   return (
-    <div className="min-h-screen bg-chess-black">
+    <>
+      <SEO 
+        title={currentLanguage === 'fa' 
+          ? 'سوالات متداول | سیاه‌رخ - تورنمنت شطرنج تهران'
+          : 'FAQ | SiahRokh - Chess Tournament Tehran'
+        }
+        description={currentLanguage === 'fa'
+          ? 'پاسخ به سوالات متداول در مورد تورنمنت‌های شطرنج، ثبت نام، قوانین مسابقات و کلاس‌های آموزشی در سیاه‌رخ.'
+          : 'Frequently asked questions about chess tournaments, registration, competition rules and training classes at SiahRokh.'
+        }
+        keywords={currentLanguage === 'fa'
+          ? 'سوالات متداول شطرنج, قوانین تورنمنت شطرنج, راهنمای ثبت نام, کلاس شطرنج تهران'
+          : 'chess FAQ, chess tournament rules, registration guide, chess classes Tehran'
+        }
+        canonicalUrl="https://siahrokh.com/faq"
+      />
+      <div className="min-h-screen bg-chess-black">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-8">
+        <header className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-4">{t('faq.title')}</h1>
           <Button 
             onClick={handleDownload}
@@ -27,7 +44,7 @@ export default function FAQ() {
             <i className="fas fa-download mx-2"></i>
             {t('faq.download')}
           </Button>
-        </div>
+        </header>
 
         <div className="bg-chess-card rounded-xl border border-gray-700 overflow-hidden">
           <iframe
@@ -39,5 +56,6 @@ export default function FAQ() {
         </div>
       </div>
     </div>
+    </>
   );
 }

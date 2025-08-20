@@ -6,9 +6,12 @@ import { CountdownTimer } from '../components/CountdownTimer';
 import { TournamentCard } from '../components/TournamentCard';
 import { RegistrationForm } from '../components/RegistrationForm';
 import { PostRegistration } from '../components/PostRegistration';
+import { SEO } from '../components/SEO';
+import { useLanguage } from '../hooks/useLanguage';
 
 export default function Home() {
   const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
   const [showPostRegistration, setShowPostRegistration] = useState(false);
@@ -24,6 +27,71 @@ export default function Home() {
   const { data: nextTournament } = useQuery<Tournament | null>({
     queryKey: ['/api/tournaments/next']
   });
+
+  // Generate structured data for SEO
+  const generateStructuredData = () => {
+    const baseData = {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": currentLanguage === 'fa' ? "سیاه‌رخ" : "SiahRokh",
+      "url": "https://siahrokh.com",
+      "logo": "https://siahrokh.com/assets/Gemini_Generated_Image_yguf2iyguf2iyguf_1755644880540.png",
+      "description": currentLanguage === 'fa' 
+        ? "رزرو آنلاین تورنمنت‌های شطرنج در تهران و ایران. کلاس‌های شطرنج، مسابقات حرفه‌ای و آموزش شطرنج برای همه سطوح."
+        : "Online booking for chess tournaments in Tehran and Iran. Professional chess classes, competitions and chess training for all levels.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "email": "info@siahrokh.ir"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "IR",
+        "addressLocality": currentLanguage === 'fa' ? "تهران" : "Tehran"
+      }
+    };
+
+    if (nextTournament) {
+      return [
+        baseData,
+        {
+          "@context": "https://schema.org",
+          "@type": "Event",
+          "name": nextTournament.name,
+          "startDate": nextTournament.date,
+          "location": {
+            "@type": "Place",
+            "name": nextTournament.venueAddress,
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": nextTournament.venueAddress,
+              "addressCountry": "IR",
+              "addressLocality": currentLanguage === 'fa' ? "تهران" : "Tehran"
+            }
+          },
+          "organizer": {
+            "@type": "Organization",
+            "name": currentLanguage === 'fa' ? "سیاه‌رخ" : "SiahRokh",
+            "url": "https://siahrokh.com"
+          },
+          "offers": {
+            "@type": "Offer",
+            "price": nextTournament.registrationFee || "0",
+            "priceCurrency": "IRR",
+            "availability": nextTournament.isOpen ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            "url": "https://siahrokh.com"
+          },
+          "eventStatus": nextTournament.isOpen ? "https://schema.org/EventScheduled" : "https://schema.org/EventCancelled",
+          "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+          "description": currentLanguage === 'fa' 
+            ? `تورنمنت شطرنج ${nextTournament.name} در تهران. هزینه ثبت نام: ${nextTournament.registrationFee || 'رایگان'}`
+            : `Chess tournament ${nextTournament.name} in Tehran. Registration fee: ${nextTournament.registrationFee || 'Free'}`
+        }
+      ];
+    }
+
+    return baseData;
+  };
 
   const handleTournamentSelect = (tournament: Tournament) => {
     setSelectedTournament(tournament);
@@ -45,26 +113,59 @@ export default function Home() {
 
   if (showPostRegistration && registrationData) {
     return (
-      <PostRegistration
-        registration={registrationData.registration}
-        tournament={registrationData.tournament}
-        onBackToHome={handleBackToHome}
-      />
+      <>
+        <SEO 
+          title={currentLanguage === 'fa' 
+            ? `ثبت نام موفق - ${registrationData.tournament.name} | سیاه‌رخ`
+            : `Registration Success - ${registrationData.tournament.name} | SiahRokh`
+          }
+        />
+        <PostRegistration
+          registration={registrationData.registration}
+          tournament={registrationData.tournament}
+          onBackToHome={handleBackToHome}
+        />
+      </>
     );
   }
 
   if (showRegistrationForm && selectedTournament) {
     return (
-      <RegistrationForm
-        tournament={selectedTournament}
-        onSuccess={handleRegistrationSuccess}
-        onCancel={handleBackToHome}
-      />
+      <>
+        <SEO 
+          title={currentLanguage === 'fa' 
+            ? `ثبت نام در ${selectedTournament.name} | سیاه‌رخ`
+            : `Register for ${selectedTournament.name} | SiahRokh`
+          }
+        />
+        <RegistrationForm
+          tournament={selectedTournament}
+          onSuccess={handleRegistrationSuccess}
+          onCancel={handleBackToHome}
+        />
+      </>
     );
   }
 
   return (
-    <main className="min-h-screen">
+    <>
+      <SEO 
+        title={currentLanguage === 'fa' 
+          ? 'سیاه‌رخ - تورنمنت شطرنج تهران | رزرو آنلاین مسابقات شطرنج ایران'
+          : 'SiahRokh - Chess Tournament Tehran | Online Chess Competition Booking Iran'
+        }
+        description={currentLanguage === 'fa'
+          ? 'رزرو آنلاین تورنمنت‌های شطرنج در تهران و ایران. کلاس‌های شطرنج، مسابقات حرفه‌ای و آموزش شطرنج برای همه سطوح در سیاه‌رخ.'
+          : 'Online booking for chess tournaments in Tehran and Iran. Professional chess classes, competitions and chess training for all levels at SiahRokh.'
+        }
+        keywords={currentLanguage === 'fa'
+          ? 'مسابقه شطرنج تهران, تورنمنت شطرنج ایران, کلاس شطرنج, مسابقات شطرنج, آموزش شطرنج, سیاه رخ, شطرنج حرفه ای'
+          : 'Chess tournament Tehran, Chess tournament Iran, Chess competition, Chess classes Iran, chess training, SiahRokh, professional chess'
+        }
+        structuredData={generateStructuredData()}
+        canonicalUrl="https://siahrokh.com/"
+      />
+      <main className="min-h-screen">
       {/* Hero Section with Countdown */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-chess-black to-chess-dark relative">
         <div className="absolute inset-0 chess-pattern opacity-5"></div>
@@ -114,7 +215,12 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             <div>
               <div className="flex items-center mb-4">
-                <img src="/assets/Gemini_Generated_Image_yguf2iyguf2iyguf_1755644880540.png" alt="SiahRokh Logo" className="w-8 h-8 mx-3" />
+                <img 
+                  src="/assets/Gemini_Generated_Image_yguf2iyguf2iyguf_1755644880540.png" 
+                  alt={currentLanguage === 'fa' ? 'لوگو سیاه‌رخ - تورنمنت شطرنج تهران' : 'SiahRokh Logo - Tehran Chess Tournament'} 
+                  className="w-8 h-8 mx-3" 
+                  loading="lazy"
+                />
                 <div>
                   <h3 className="text-xl font-bold text-white">سیاه‌رخ</h3>
                   <p className="text-xs text-gray-400">SiahRokh</p>
@@ -158,5 +264,6 @@ export default function Home() {
         </div>
       </footer>
     </main>
+    </>
   );
 }
