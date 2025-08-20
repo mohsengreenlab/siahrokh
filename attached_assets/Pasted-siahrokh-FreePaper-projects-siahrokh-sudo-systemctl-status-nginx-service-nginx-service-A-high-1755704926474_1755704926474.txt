@@ -1,0 +1,61 @@
+siahrokh@FreePaper:~/projects/siahrokh$ sudo systemctl status nginx.service
+● nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: en>
+     Active: active (running) since Thu 2025-07-31 08:53:39 UTC; 2 weeks 6 days>
+       Docs: man:nginx(8)
+    Process: 2287248 ExecReload=/usr/sbin/nginx -g daemon on; master_process on>
+   Main PID: 2845662 (nginx)
+      Tasks: 3 (limit: 4543)
+     Memory: 9.4M (peak: 16.8M)
+        CPU: 2min 20.734s
+     CGroup: /system.slice/nginx.service
+             ├─2845662 "nginx: master process /usr/sbin/nginx -g daemon on; mas>
+             ├─4154657 "nginx: worker process"
+             └─4154658 "nginx: worker process"
+
+Aug 18 10:49:47 FreePaper nginx[4154655]: 2025/08/18 10:49:47 [warn] 4154655#41>
+Aug 18 10:49:47 FreePaper nginx[4154655]: 2025/08/18 10:49:47 [warn] 4154655#41>
+Aug 18 10:49:47 FreePaper nginx[4154655]: 2025/08/18 10:49:47 [notice] 4154655#>
+Aug 18 10:49:47 FreePaper systemd[1]: Reloaded nginx.service - A high performan>
+Aug 20 15:34:10 FreePaper systemd[1]: Reloading nginx.service - A high performa>
+Aug 20 15:34:10 FreePaper nginx[2287248]: 2025/08/20 15:34:10 [warn] 2287248#22>
+Aug 20 15:34:10 FreePaper nginx[2287248]: 2025/08/20 15:34:10 [warn] 2287248#22>
+Aug 20 15:34:10 FreePaper nginx[2287248]: 2025/08/20 15:34:10 [emerg] 2287248#2>
+Aug 20 15:34:10 FreePaper systemd[1]: nginx.service: Control process exited, co>
+
+siahrokh@FreePaper:~/projects/siahrokh$ sudo journalctl -xeu nginx.service
+░░ 
+░░ A reload job for unit nginx.service has begun execution.
+░░ 
+░░ The job identifier is 3763019.
+Aug 20 15:34:10 FreePaper nginx[2287248]: 2025/08/20 15:34:10 [warn] 2287248#22>
+Aug 20 15:34:10 FreePaper nginx[2287248]: 2025/08/20 15:34:10 [warn] 2287248#22>
+Aug 20 15:34:10 FreePaper nginx[2287248]: 2025/08/20 15:34:10 [emerg] 2287248#2>
+Aug 20 15:34:10 FreePaper systemd[1]: nginx.service: Control process exited, co>
+░░ Subject: Unit process exited
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░ 
+░░ An ExecReload= process belonging to unit nginx.service has exited.
+░░ 
+░░ The process' exit code is 'exited' and its exit status is 1.
+Aug 20 15:34:10 FreePaper systemd[1]: Reload failed for nginx.service - A high >
+░░ Subject: A reload job for unit nginx.service has finished
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░ 
+░░ A reload job for unit nginx.service has finished.
+░░ 
+░░ The job identifier is 3763019 and the job result is failed.
+
+siahrokh@FreePaper:~/projects/siahrokh$ sudo nginx -t
+2025/08/20 15:36:56 [warn] 2290276#2290276: protocol options redefined for 0.0.0.0:443 in /etc/nginx/sites-enabled/topteachers.online:16
+2025/08/20 15:36:56 [warn] 2290276#2290276: protocol options redefined for 0.0.0.0:443 in /etc/nginx/sites-enabled/trustline:24
+2025/08/20 15:36:56 [emerg] 2290276#2290276: cannot load certificate "/etc/letsencrypt/live/siahrokh.ir/fullchain.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/letsencrypt/live/siahrokh.ir/fullchain.pem, r) error:10000080:BIO routines::no such file)
+nginx: configuration file /etc/nginx/nginx.conf test failed
+siahrokh@FreePaper:~/projects/siahrokh$ sudo tail -20 /var/log/nginx/error.log
+2025/08/20 01:05:02 [error] 4154657#4154657: *93311 access forbidden by rule, client: 172.70.46.206, server: partnersystems.online, request: "GET /.git/config HTTP/2.0", host: "partnersystems.online"
+2025/08/20 08:45:38 [error] 4154657#4154657: *95240 access forbidden by rule, client: 172.68.42.74, server: partnersystems.online, request: "GET /.env HTTP/2.0", host: "partnersystems.online"
+2025/08/20 12:35:45 [error] 4154658#4154658: *96321 access forbidden by rule, client: 172.68.42.99, server: partnersystems.online, request: "GET /.env HTTP/2.0", host: "partnersystems.online"
+2025/08/20 13:14:44 [error] 4154658#4154658: *96588 access forbidden by rule, client: 104.23.166.147, server: partnersystems.online, request: "GET /.git/config HTTP/2.0", host: "www.partnersystems.online"
+2025/08/20 13:24:46 [error] 4154657#4154657: *96607 access forbidden by rule, client: 172.71.99.184, server: partnersystems.online, request: "GET /.git/config HTTP/2.0", host: "partnersystems.online"
