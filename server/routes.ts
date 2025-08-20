@@ -608,8 +608,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Serve uploaded files
-  app.use('/uploads', express.static(uploadDir));
+  // Serve uploaded files - use the base uploads directory to match the stored file paths
+  const baseUploadDir = path.join(process.cwd(), 'uploads');
+  app.use('/uploads', express.static(baseUploadDir));
 
   const httpServer = createServer(app);
   return httpServer;
