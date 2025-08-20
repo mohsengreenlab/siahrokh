@@ -31,6 +31,10 @@ export function TournamentCard({ tournament, onSelect }: TournamentCardProps) {
           <i className="fas fa-clock mx-2 text-gray-400"></i>
           <span>{tournament.time}</span>
         </div>
+        <div className="flex items-center text-sm text-gray-300">
+          <i className="fas fa-money-bill mx-2 text-gray-400"></i>
+          <span>{tournament.registrationFee || 'Free'}</span>
+        </div>
       </div>
       <button
         onClick={() => onSelect(tournament)}

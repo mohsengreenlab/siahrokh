@@ -23,7 +23,8 @@ const tournamentSchema = z.object({
   time: z.string().min(1, 'Time is required'),
   isOpen: z.boolean(),
   venueAddress: z.string().min(1, 'Venue address is required'),
-  venueInfo: z.string().optional()
+  venueInfo: z.string().optional(),
+  registrationFee: z.string().min(1, 'Registration fee is required')
 });
 
 export default function Admin() {
@@ -62,7 +63,8 @@ export default function Admin() {
       time: '',
       isOpen: false,
       venueAddress: '',
-      venueInfo: ''
+      venueInfo: '',
+      registrationFee: ''
     }
   });
 
@@ -330,6 +332,24 @@ export default function Admin() {
                           className="bg-chess-dark border-gray-600 text-white"
                           placeholder="Additional Venue Information"
                           rows={3}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="registrationFee"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-300">Registration Fee</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          className="bg-chess-dark border-gray-600 text-white"
+                          placeholder="e.g., 250,000 Tomans"
                         />
                       </FormControl>
                       <FormMessage />

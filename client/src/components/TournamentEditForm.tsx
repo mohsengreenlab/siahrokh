@@ -20,7 +20,8 @@ const editTournamentSchema = z.object({
   time: z.string().min(1, 'Time is required'),
   isOpen: z.boolean(),
   venueAddress: z.string().min(1, 'Venue address is required'),
-  venueInfo: z.string().optional()
+  venueInfo: z.string().optional(),
+  registrationFee: z.string().min(1, 'Registration fee is required')
 });
 
 interface TournamentEditFormProps {
@@ -40,7 +41,8 @@ export function TournamentEditForm({ tournament }: TournamentEditFormProps) {
       time: tournament.time,
       isOpen: tournament.isOpen,
       venueAddress: tournament.venueAddress,
-      venueInfo: tournament.venueInfo || ''
+      venueInfo: tournament.venueInfo || '',
+      registrationFee: tournament.registrationFee || ''
     }
   });
 
@@ -203,6 +205,25 @@ export function TournamentEditForm({ tournament }: TournamentEditFormProps) {
                         {...field}
                         className="bg-gray-800 border-gray-600 text-white"
                         data-testid="textarea-edit-venue-info"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="registrationFee"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-300">Registration Fee</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        placeholder="e.g., 250,000 Tomans"
+                        data-testid="input-edit-registration-fee"
                       />
                     </FormControl>
                     <FormMessage />

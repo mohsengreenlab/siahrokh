@@ -481,11 +481,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/tournaments", requireAuth, async (req, res) => {
     try {
-      const { name, date, time, isOpen, venueAddress, venueInfo } = req.body;
+      const { name, date, time, isOpen, venueAddress, venueInfo, registrationFee } = req.body;
       
       // Validate required fields
-      if (!name || !date || !venueAddress) {
-        return res.status(400).json({ error: "Missing required fields: name, date, venueAddress" });
+      if (!name || !date || !venueAddress || !registrationFee) {
+        return res.status(400).json({ error: "Missing required fields: name, date, venueAddress, registrationFee" });
       }
       
       // Handle different date formats from frontend
@@ -516,7 +516,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         time: tournamentTime,
         isOpen: Boolean(isOpen),
         venueAddress: venueAddress.trim(),
-        venueInfo: venueInfo?.trim() || null
+        venueInfo: venueInfo?.trim() || null,
+        registrationFee: registrationFee.trim()
       };
       
       const tournament = await storage.createTournament(tournamentData);
@@ -530,7 +531,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/tournaments/:id", requireAuth, async (req, res) => {
     try {
-      const { name, date, time, isOpen, venueAddress, venueInfo } = req.body;
+      const { name, date, time, isOpen, venueAddress, venueInfo, registrationFee } = req.body;
       
       // Validate date and time inputs
       if (!date || !time) {
@@ -551,7 +552,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         time: time,
         isOpen: Boolean(isOpen),
         venueAddress: venueAddress?.trim(),
-        venueInfo: venueInfo?.trim() || null
+        venueInfo: venueInfo?.trim() || null,
+        registrationFee: registrationFee?.trim() || "0"
       } as InsertTournament;
       
       console.log('Updating tournament with data:', tournamentToUpdate);

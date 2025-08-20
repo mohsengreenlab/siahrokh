@@ -18,6 +18,7 @@ export const tournaments = pgTable("tournaments", {
   isOpen: boolean("is_open").notNull().default(false),
   venueAddress: text("venue_address").notNull(),
   venueInfo: text("venue_info"),
+  registrationFee: text("registration_fee").notNull().default("0"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
 });
