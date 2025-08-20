@@ -1,0 +1,116 @@
+**Task:** Deploy the **SiahRokh Chess Tournament Booking Website** to my Ubuntu VPS, safely and cleanly, using the following requirements. Read everything carefully and produce fully copy-pasteable commands and config files.
+
+---
+
+## 0) Read & verify first
+1) **Read the updated VPS documentation I attached** (apps, domains, ports, DBs, process managers, Nginx, TLS).
+2) **List any existing ports, domains, and database names/users** from that doc to avoid conflicts.
+3) Confirm there will be **no conflicts** with existing apps (ports, Nginx `server_name`, PM2 names, Postgres DBs/users, deploy webhooks).
+
+> If a conflict is detected, **propose the smallest safe change** and continue with that change (e.g., pick the next free PORT).
+
+---
+
+## 1) Deployment targets
+- **Domain:** `siahrokh.ir` (+ `www.siahrokh.ir`)
+- **DNS:** Cloudflare (but **SSL/TLS must be local on VPS** via Let’s Encrypt/Certbot — do NOT offload TLS at Cloudflare)
+- **Preferred internal app port:** `3007` (if free; otherwise pick the next free high port and note it)
+- **Stack:** Node.js + Express (TypeScript), React (Vite), PostgreSQL, Drizzle ORM
+- **Process Manager:** PM2 (with systemd startup)
+- **Reverse Proxy:** Nginx (HTTP→HTTPS redirect, security headers, gzip, caching for static)
+- **Security:** run as a dedicated root user with password; `.env` chmod 600
+- **Database is critical:** ensure DB connectivity, run migrations, and verify app reads/writes to DB
+
+---
+
+## 2) What to deliver (outputs)
+Produce **exact, ready-to-run** artifacts. Use placeholders where appropriate.
+
+1) **Commands (bash)** to:
+   - Create root system user: `siahrokh`
+   - Create project dir: `/home/siahrokh/projects/siahrokh`
+   - Install app deps, build the app
+   - Create `.env` with **all required variables**:
+     - `NODE_ENV=production`
+     - `PORT=<FINAL_APP_PORT>`
+     - `DATABASE_URL=postgresql://siahrokh_user:<STRONG_PASSWORD>@localhost:5432/siahrokh_db`
+     - `SESSION_SECRET=<SESSION_SECRET>`
+     - Any other vars required by this repo (e.g., CSRF/session, upload paths, Puppeteer flags)
+   - Set file permissions (chmod 600 for `.env`)
+   - Run **Drizzle** migrations (e.g., `npm run db:push` or the equivalent in this project)
+   - Start and persist with **PM2** (cluster 1 instance unless you detect CPU>1 and it’s safe)
+   - Enable PM2 on boot (`pm2 startup`, `pm2 save`)
+
+2) **PostgreSQL SQL** to:
+   - Create DB `siahrokh_db`, role `siahrokh_user` with a strong password
+   - Grant ownership/privileges
+   - (Optional hardening) ensure local-only access
+   - Provide a tiny verification snippet (e.g., `SELECT now();`) and instructions to test connectivity
+
+3) **Nginx site config** file at `/etc/nginx/sites-available/siahrokh`:
+   - `server_name siahrokh.ir www.siahrokh.ir;`
+   - 80 → 301 redirect to 443
+   - 443 vhost with **local** Let’s Encrypt cert paths
+   - Proxy to `http://127.0.0.1:<FINAL_APP_PORT>`
+   - **Security headers** (X-Frame-Options, X-Content-Type-Options, X-XSS-Protection or `permissions-policy` equivalent, HSTS, Referrer-Policy)
+   - **CSP** a safe default for this app (allow self, data, blob, and what Vite build needs)
+   - Gzip on; long cache for static (`.css`, `.js`, `.woff2`, images) with `immutable`
+   - Deny access to dotfiles
+
+4) **Certbot commands** to obtain and auto-renew certificates:
+     - Run `certbot --nginx -d siahrokh.ir -d www.siahrokh.ir`
+     - Test renew: `certbot renew --dry-run`
+
+5) **App code adjustments** (if not already present) for reverse proxy:
+   - `app.set('trust proxy', 1)`
+   - Secure cookies when `NODE_ENV=production`, sameSite settings appropriate for your flows
+   - Multer upload dir location on VPS
+   - Health endpoint `GET /healthz` returning 200 JSON `{status:"ok"}`
+
+6) **PM2 ecosystem file** (`ecosystem.config.cjs`), with:
+   - `name: "siahrokh"`
+   - `script: "dist/index.js"` (or the app’s start entry)
+   - `cwd`, `instances`, `exec_mode`, `env` (matching `.env`), `max_memory_restart`
+   - Log files under `/home/siahrokh/logs/`
+
+7) **Firewall (UFW) optional**:
+   - Provide the exact commands to enable UFW safely:
+     - Allow OpenSSH
+     - Allow `Nginx Full`
+     - Enable UFW
+
+8) **Verification steps**:
+   - `curl -I https://siahrokh.ir` and expect `200`/`301` chain to 443
+   - `curl https://siahrokh.ir/healthz` → `{status:"ok"}`
+   - Check PM2 logs and Nginx error logs
+   - Confirm DB read/write by creating a **throwaway test record** through the app or via a small script, then reading it back
+
+9) **Rollback plan**:
+   - If any step fails, provide `pm2 stop/delete siahrokh`, remove Nginx symlink, and `systemctl reload nginx`
+   - Keep DB intact unless explicitly told to drop
+   - How to revert Cloudflare proxy state
+
+---
+
+## 3) Conventions & constraints
+- **Do NOT modify** other apps, users, services, or Nginx sites
+- Use **idempotent** commands where feasible (check-before-create)
+- Use **placeholders** for secrets: `<STRONG_PASSWORD>`, `<SESSION_SECRET>`
+- Assume **Ubuntu** with Nginx, Node, PM2, PostgreSQL, and Certbot available (include install commands if missing)
+- Respect the app’s **strict grayscale / WCAG** setup (no change needed—just ensure proxy/cookies/uploads work)
+- **Database correctness is crucial**: migrations must run, app must connect, and a real insert/select verification should pass
+
+---
+
+## 4) Final format
+Output all of the above as:
+- **(A) One Bash section** with commands I can paste line-by-line
+- **(B) The Nginx site file** contents (ready to save)
+- **(C) The PM2 ecosystem file** contents
+- **(D) The `.env` template**
+- **(E) The SQL block** for PostgreSQL
+- **(F) A short checklist to validate success
+
+Make sure all paths, ports, service names, and commands are consistent across the whole output.
+
+---
