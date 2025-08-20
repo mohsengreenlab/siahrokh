@@ -48,7 +48,7 @@ interface RegistrationFormProps {
 }
 
 export function RegistrationForm({ tournament, onSuccess, onCancel }: RegistrationFormProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDragOver, setIsDragOver] = useState(false);
@@ -363,12 +363,15 @@ export function RegistrationForm({ tournament, onSuccess, onCancel }: Registrati
                       {t('registration.receipt')} <span className="text-gray-400">*</span>
                     </FormLabel>
                     <div className="mt-2 mb-3 p-3 bg-blue-900/20 border border-blue-700 rounded-lg">
-                      <div className="text-sm text-blue-200 mb-2" dir="rtl">
-                        لطفا هزینه ثبت نام را {tournament.registrationFee || 'رایگان'} به شماره کارت 6037991563160120 به نام سید محسن مصباحی واریز نمایید
-                      </div>
-                      <div className="text-sm text-blue-200" dir="ltr">
-                        Please send the registration fee {tournament.registrationFee || 'Free'} to the card number 6037991563160120 cardholder name "Seyed Mohsen Mesbahi". In case you'd like to pay in other currencies, please contact the support info@siahrokh.ir
-                      </div>
+                      {i18n.language === 'fa' ? (
+                        <div className="text-sm text-blue-200" dir="rtl">
+                          لطفا هزینه ثبت نام را {tournament.registrationFee || 'رایگان'} به شماره کارت 6037991563160120 به نام سید محسن مصباحی واریز نمایید
+                        </div>
+                      ) : (
+                        <div className="text-sm text-blue-200" dir="ltr">
+                          Please send the registration fee {tournament.registrationFee || 'Free'} to the card number 6037991563160120 cardholder name "Seyed Mohsen Mesbahi". In case you'd like to pay in other currencies, please contact the support info@siahrokh.ir
+                        </div>
+                      )}
                     </div>
                     <FormControl>
                       <div
