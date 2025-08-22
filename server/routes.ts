@@ -127,6 +127,79 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Language-specific HTML serving middleware
+  app.get(['/en', '/en/*', '/fa', '/fa/*'], (req, res, next) => {
+    const lang = req.path.startsWith('/en') ? 'en' : 'fa';
+    const isRTL = lang === 'fa';
+    
+    // Read the base HTML file
+    const htmlPath = path.join(process.cwd(), 'client', 'index.html');
+    let html = fs.readFileSync(htmlPath, 'utf8');
+    
+    // Language-specific meta content
+    const metaContent = {
+      fa: {
+        title: 'سیاه‌رخ - تورنمنت شطرنج تهران | رزرو آنلاین مسابقات شطرنج ایران',
+        description: 'رزرو آنلاین تورنمنت‌های شطرنج در تهران و ایران. کلاس‌های شطرنج، مسابقات حرفه‌ای و آموزش شطرنج برای همه سطوح در سیاه‌رخ.',
+        siteName: 'سیاه‌رخ',
+        locale: 'fa_IR'
+      },
+      en: {
+        title: 'SiahRokh - Chess Tournament Tehran | Online Chess Competition Booking Iran',
+        description: 'Online booking for chess tournaments in Tehran and Iran. Professional chess classes, competitions and chess training for all levels at SiahRokh.',
+        siteName: 'SiahRokh',
+        locale: 'en_US'
+      }
+    };
+    
+    const content = metaContent[lang];
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const canonicalUrl = `${baseUrl}/${lang}${req.path.substring(3) || ''}`;
+    
+    // Replace meta tags with language-specific content
+    html = html
+      // Update html lang and dir attributes
+      .replace('<html lang="fa" dir="rtl">', `<html lang="${lang}" dir="${isRTL ? 'rtl' : 'ltr'}">`)
+      // Update title
+      .replace(/<title>.*?<\/title>/, `<title>${content.title}</title>`)
+      // Update description
+      .replace(/name="description" content=".*?"/, `name="description" content="${content.description}"`)
+      // Update Open Graph tags
+      .replace(/property="og:title" content=".*?"/, `property="og:title" content="${content.title}"`)
+      .replace(/property="og:description" content=".*?"/, `property="og:description" content="${content.description}"`)
+      .replace(/property="og:site_name" content=".*?"/, `property="og:site_name" content="${content.siteName}"`)
+      .replace(/property="og:locale" content=".*?"/, `property="og:locale" content="${content.locale}"`)
+      .replace(/property="og:url" content=".*?"/, `property="og:url" content="${canonicalUrl}"`)
+      .replace(/property="og:image" content=".*?"/, `property="og:image" content="${baseUrl}/assets/Gemini_Generated_Image_yguf2iyguf2iyguf_1755644880540.png"`)
+      // Update Twitter Card tags
+      .replace(/name="twitter:title" content=".*?"/, `name="twitter:title" content="${content.title}"`)
+      .replace(/name="twitter:description" content=".*?"/, `name="twitter:description" content="${content.description}"`)
+      .replace(/name="twitter:image" content=".*?"/, `name="twitter:image" content="${baseUrl}/assets/Gemini_Generated_Image_yguf2iyguf2iyguf_1755644880540.png"`);
+    
+    // Add missing meta tags if they don't exist
+    if (!html.includes('property="og:title"')) {
+      html = html.replace('<meta property="og:type"', `<meta property="og:title" content="${content.title}" />\n    <meta property="og:type"`);
+    }
+    if (!html.includes('property="og:description"')) {
+      html = html.replace('<meta property="og:type"', `<meta property="og:description" content="${content.description}" />\n    <meta property="og:type"`);
+    }
+    if (!html.includes('property="og:url"')) {
+      html = html.replace('<meta property="og:type"', `<meta property="og:url" content="${canonicalUrl}" />\n    <meta property="og:type"`);
+    }
+    if (!html.includes('name="twitter:title"')) {
+      html = html.replace('<meta name="twitter:card"', `<meta name="twitter:title" content="${content.title}" />\n    <meta name="twitter:card"`);
+    }
+    if (!html.includes('name="twitter:description"')) {
+      html = html.replace('<meta name="twitter:card"', `<meta name="twitter:description" content="${content.description}" />\n    <meta name="twitter:card"`);
+    }
+    if (!html.includes('name="twitter:image"')) {
+      html = html.replace('<meta name="twitter:card"', `<meta name="twitter:image" content="${baseUrl}/assets/Gemini_Generated_Image_yguf2iyguf2iyguf_1755644880540.png" />\n    <meta name="twitter:card"`);
+    }
+    
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  });
+
   // Apply rate limiter only to public API routes (exclude admin routes)
   app.use('/api', (req, res, next) => {
     if (req.path.startsWith('/admin')) {
