@@ -15,15 +15,12 @@ export function SEO({
   title, 
   description, 
   keywords, 
-  ogImage,
+  ogImage = '/assets/Gemini_Generated_Image_yguf2iyguf2iyguf_1755644880540.png',
   structuredData,
   canonicalUrl 
 }: SEOProps) {
   const { t } = useTranslation();
   const { currentLanguage, isRTL } = useLanguage();
-  
-  // Use language-specific image if not provided
-  const defaultOgImage = ogImage || '/assets/Gemini_Generated_Image_yguf2iyguf2iyguf_1755644880540.png';
 
   useEffect(() => {
     // Update document language and direction
@@ -77,40 +74,16 @@ export function SEO({
     updateMeta('og:title', finalTitle, true);
     updateMeta('og:description', description || defaultDescriptions[currentLanguage as keyof typeof defaultDescriptions], true);
     updateMeta('og:type', 'website', true);
-    updateMeta('og:image', `${window.location.origin}${defaultOgImage}`, true);
-    
-    // Build language-specific canonical URL
-    const baseUrl = window.location.origin;
-    const currentPath = window.location.pathname;
-    let languageSpecificUrl: string;
-    
-    if (canonicalUrl) {
-      languageSpecificUrl = canonicalUrl;
-    } else {
-      // Extract path without language prefix
-      let pathWithoutLang = currentPath;
-      if (pathWithoutLang.startsWith('/en') || pathWithoutLang.startsWith('/fa')) {
-        pathWithoutLang = pathWithoutLang.substring(3) || '';
-      }
-      // Build URL with current language
-      languageSpecificUrl = `${baseUrl}/${currentLanguage}${pathWithoutLang}`;
-    }
-    
-    updateMeta('og:url', languageSpecificUrl, true);
+    updateMeta('og:image', `${window.location.origin}${ogImage}`, true);
+    updateMeta('og:url', canonicalUrl || window.location.href, true);
     updateMeta('og:site_name', currentLanguage === 'fa' ? 'سیاه‌رخ' : 'SiahRokh', true);
     updateMeta('og:locale', currentLanguage === 'fa' ? 'fa_IR' : 'en_US', true);
-    
-    // Add additional Open Graph tags for better social media preview
-    updateMeta('og:image:width', '1200', true);
-    updateMeta('og:image:height', '630', true);
-    updateMeta('og:image:alt', currentLanguage === 'fa' ? 'سیاه‌رخ - تورنمنت شطرنج تهران' : 'SiahRokh - Chess Tournament Tehran', true);
 
     // Twitter Card meta tags
     updateMeta('twitter:card', 'summary_large_image');
     updateMeta('twitter:title', finalTitle);
     updateMeta('twitter:description', description || defaultDescriptions[currentLanguage as keyof typeof defaultDescriptions]);
-    updateMeta('twitter:image', `${window.location.origin}${defaultOgImage}`);
-    updateMeta('twitter:image:alt', currentLanguage === 'fa' ? 'سیاه‌رخ - تورنمنت شطرنج تهران' : 'SiahRokh - Chess Tournament Tehran');
+    updateMeta('twitter:image', `${window.location.origin}${ogImage}`);
 
     // Canonical URL
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
@@ -119,10 +92,13 @@ export function SEO({
       canonical.rel = 'canonical';
       document.head.appendChild(canonical);
     }
-    canonical.href = languageSpecificUrl;
+    canonical.href = canonicalUrl || window.location.href;
 
     // Alternate language links - properly set URLs for both languages
-    // Extract the path without language prefix  
+    const baseUrl = window.location.origin;
+    const currentPath = window.location.pathname;
+    
+    // Extract the path without language prefix
     let pathWithoutLang = currentPath;
     if (pathWithoutLang.startsWith('/en') || pathWithoutLang.startsWith('/fa')) {
       pathWithoutLang = pathWithoutLang.substring(3) || '/';
@@ -169,7 +145,7 @@ export function SEO({
       structuredDataScript.innerHTML = JSON.stringify(structuredData);
     }
 
-  }, [title, description, keywords, currentLanguage, isRTL, defaultOgImage, structuredData, canonicalUrl]);
+  }, [title, description, keywords, currentLanguage, isRTL, ogImage, structuredData, canonicalUrl]);
 
   return null;
 }
