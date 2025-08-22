@@ -94,7 +94,17 @@ export function SEO({
     }
     canonical.href = canonicalUrl || window.location.href;
 
-    // Alternate language links
+    // Alternate language links - properly set URLs for both languages
+    const baseUrl = window.location.origin;
+    const currentPath = window.location.pathname;
+    
+    // Extract the path without language prefix
+    let pathWithoutLang = currentPath;
+    if (pathWithoutLang.startsWith('/en') || pathWithoutLang.startsWith('/fa')) {
+      pathWithoutLang = pathWithoutLang.substring(3) || '/';
+    }
+    if (pathWithoutLang === '/') pathWithoutLang = '';
+    
     let alternateFa = document.querySelector('link[hreflang="fa"]') as HTMLLinkElement;
     if (!alternateFa) {
       alternateFa = document.createElement('link');
@@ -102,7 +112,7 @@ export function SEO({
       alternateFa.hreflang = 'fa';
       document.head.appendChild(alternateFa);
     }
-    alternateFa.href = window.location.href;
+    alternateFa.href = `${baseUrl}/fa${pathWithoutLang}`;
 
     let alternateEn = document.querySelector('link[hreflang="en"]') as HTMLLinkElement;
     if (!alternateEn) {
@@ -111,7 +121,17 @@ export function SEO({
       alternateEn.hreflang = 'en';
       document.head.appendChild(alternateEn);
     }
-    alternateEn.href = window.location.href;
+    alternateEn.href = `${baseUrl}/en${pathWithoutLang}`;
+    
+    // Add x-default hreflang
+    let xDefault = document.querySelector('link[hreflang="x-default"]') as HTMLLinkElement;
+    if (!xDefault) {
+      xDefault = document.createElement('link');
+      xDefault.rel = 'alternate';
+      xDefault.hreflang = 'x-default';
+      document.head.appendChild(xDefault);
+    }
+    xDefault.href = `${baseUrl}/fa${pathWithoutLang}`; // Default to Persian
 
     // Structured Data
     if (structuredData) {
